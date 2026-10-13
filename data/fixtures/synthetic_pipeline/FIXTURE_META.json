@@ -1,0 +1,6 @@
+{
+  "purpose": "synthetic_pipeline_test_fixture",
+  "exclude_from_real_training": true,
+  "exclude_from_real_evaluation": true,
+  "note": "Not a real food dataset. Used only to test preparation code."
+}

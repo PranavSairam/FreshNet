@@ -1,0 +1,96 @@
+{
+  "accepted_input": "A still image that PIL.Image.open can decode. Deployment opens the file and calls convert('RGB').",
+  "rgb_conversion": "PIL Image.convert('RGB') after Image.open. No EXIF transpose.",
+  "exif_orientation": "Not applied. Photos whose pixels are stored rotated, with orientation only in EXIF, are an integration constraint. Parity was not claimed for that case.",
+  "transparency": "Alpha is not a separate input. PIL convert('RGB') flattens it. Parity was not claimed for transparent images.",
+  "animation": "Image.open uses the default first frame. Later frames are not read.",
+  "resize_sequence": [
+    "Resize the RGB image to detail_size x detail_size with torchvision.transforms.Resize. Training calls Resize((384, 384)) and does not pass interpolation or antialias, so the installed defaults apply: bilinear and antialias=True. On PIL images, bilinear resize is antialiased.",
+    "From that 384 image, resize a context copy to 224 x 224 with PIL.Image.resize and Image.Resampling.BILINEAR.",
+    "From the same 384 image, crop five 160 x 160 patches. There is no center-crop of the original and no second patch extraction."
+  ],
+  "context_size": 224,
+  "detail_size": 384,
+  "patch_size": 160,
+  "patch_order": [
+    "top_left",
+    "top_right",
+    "bottom_left",
+    "bottom_right",
+    "center"
+  ],
+  "patch_positions_on_384": [
+    [
+      0,
+      0
+    ],
+    [
+      224,
+      0
+    ],
+    [
+      0,
+      224
+    ],
+    [
+      224,
+      224
+    ],
+    [
+      112,
+      112
+    ]
+  ],
+  "interpolation": "bilinear",
+  "torchvision_resize_antialias_default": true,
+  "tensor_scaling": "torchvision.transforms.ToTensor scales uint8 RGB to float32 in [0, 1] and layouts channels as CHW.",
+  "normalization": {
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ],
+    "applied": "once, after ToTensor, separately to the context image and to each patch"
+  },
+  "imagenet_mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "imagenet_std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "branch_transforms_inside_model": false,
+  "augmentation_at_inference": false,
+  "eval_deterministic": true,
+  "train_augmentation_recorded_but_not_used": {
+    "horizontal_flip_p": 0.5,
+    "rotation_degrees": 12,
+    "color_jitter": {
+      "brightness": 0.08,
+      "contrast": 0.08,
+      "saturation": 0.05,
+      "hue": 0.01
+    }
+  },
+  "input_dtype": "float32",
+  "channel_order": "RGB",
+  "context_shape": [
+    3,
+    224,
+    224
+  ],
+  "patches_shape": [
+    5,
+    3,
+    160,
+    160
+  ]
+}

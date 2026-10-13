@@ -1,0 +1,104 @@
+# Dataset preparation — FreshNet
+# Paths are relative to the repository root unless absolute.
+
+dataset:
+  name: local_food_freshness
+  # Detected on disk during Stage 2: data/Dataset/{Fresh,Rotten}/<food>/...
+  # Change this if you place data elsewhere.
+  source_path: data/Dataset
+  input_mode: class_folders  # class_folders | csv_manifest
+  csv_manifest_path: null
+  image_extensions: [".jpg", ".jpeg", ".png", ".webp", ".bmp"]
+  exclude_path_parts:
+    - fixtures
+    - synthetic_pipeline
+  license_candidates:
+    - LICENSE
+    - LICENSE.txt
+    - LICENSE.md
+    - COPYING
+    - README.md
+    - README.txt
+  provenance_note: >
+    Local copy under data/Dataset. No download URL is claimed by this project.
+    Record the original source and license yourself before redistribution.
+
+labels:
+  # Active training/inference taxonomy is binary. Medium is future-only.
+  intended_classes: [Fresh, Spoiled]
+  future_extension_classes: [Medium]
+  mapping:
+    Fresh: Fresh
+    fresh: Fresh
+    Rotten: Spoiled
+    rotten: Spoiled
+    Spoiled: Spoiled
+    spoiled: Spoiled
+    Stale: Spoiled
+    stale: Spoiled
+  require_for_three_class: [Fresh, Medium, Spoiled]
+  allow_two_class_training: true
+
+validation:
+  max_sample_for_dimension_stats: 5000
+  fail_on_unreadable: false
+  min_side_px: 16
+
+duplicates:
+  enable_exact: true
+  enable_near: true
+  near_hash_size: 8
+  near_hamming_threshold: 5
+  # Legacy prep cap; integrity audit uses scalable cached banded search instead.
+  near_max_images: 20000
+  near_affects_splits: false
+
+grouping:
+  # Prefer CSV columns when present. Otherwise derive from path/filename heuristics.
+  prefer_columns: [specimen_id, capture_session, food_type]
+  # Strip known augmentation prefixes before grouping related captures.
+  augmentation_prefixes:
+    - "rotated_by_15_"
+    - "rotated_by_30_"
+    - "rotated_by_45_"
+    - "rotated_by_60_"
+    - "rotated_by_75_"
+    - "vertical_flip_"
+    - "horizontal_flip_"
+    - "translation_"
+    - "saltandpepper_"
+    - "salt_and_pepper_"
+  residual_leakage_warning: >
+    When specimen_id / capture_session are absent, groups are inferred from
+    food subtype folders, stripped filenames, and duplicate clusters. Related
+    but differently named captures may still leak across splits. Treat metrics
+    with that residual risk in mind.
+
+splits:
+  ratios:
+    train: 0.70
+    val: 0.15
+    test: 0.15
+  seed: 42
+  official_split_dir_names: [train, training, val, valid, validation, test, testing]
+  preserve_official_splits: true
+
+transforms:
+  image_size: 224
+  train:
+    horizontal_flip_p: 0.5
+    rotation_degrees: 12
+    # Mild color jitter — discoloration is a freshness cue; do not overpower it.
+    color_jitter:
+      brightness: 0.08
+      contrast: 0.08
+      saturation: 0.05
+      hue: 0.01
+  eval:
+    deterministic: true
+
+output:
+  processed_dir: data/processed
+  manifests_dir: data/processed/manifests
+  reports_dir: data/processed/reports
+  fixtures_dir: data/fixtures/synthetic_pipeline

@@ -1,0 +1,33 @@
+{
+  "architecture": "fused",
+  "reconstruct_with_pretrained_download": false,
+  "num_classes": 2,
+  "embedding_dim": 256,
+  "dropout": 0.3,
+  "context": {
+    "backbone": "efficientnet_b0",
+    "classifier_replaced_with": "Identity",
+    "projection": "Linear(1280, 256) then ReLU",
+    "load_imagenet_weights": false
+  },
+  "detail": {
+    "patch_layout": "corners_center",
+    "channels": [
+      32,
+      64,
+      128,
+      256
+    ],
+    "shared_cnn": "Conv-BN-ReLU stride 2 per channel stage, adaptive average pool, Linear to 256",
+    "aggregation": "mean over the five patch embeddings, then Linear(256, 256) and ReLU"
+  },
+  "fusion": "concatenate context and detail embeddings on dim 1 (512), then LayerNorm, Dropout(0.3), Linear(512, 2)",
+  "classifier_in_features": 512,
+  "classifier_out_features": 2,
+  "decision_rule": "argmax over the two logits",
+  "probabilities": "softmax over dim 1 (the class dimension). These are not a calibrated freshness percentage.",
+  "label_order": [
+    "Fresh",
+    "Spoiled"
+  ]
+}

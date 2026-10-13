@@ -1,0 +1,14 @@
+{
+  "algorithm": "sha256",
+  "model_version": "freshnet-v3-fused-epoch29-b962c650ed80",
+  "files": {
+    "weights.pt": "c29b015d3226ae21e847dbeba5cf7d5793d50da3b4bbe119d63c4a6e7e17f008",
+    "architecture.json": "9e3fa97fa17c38f20e76baa110f491d624879f3c821813630f444c3520b08b92",
+    "class_mapping.json": "a431a31329cd914c7ee1d9c78babae247b87746795e42d92fe576c71356abb20",
+    "preprocessing.json": "43a33fad1bfd5bff1272176a4dea1fed2f2a3ac9590ec6dc36418a2d92eb26b2",
+    "metadata.json": "e2d38b2951d673e40201dfd6531b23c651a077ac01a7416c305240f692c9d19c",
+    "runtime.json": "4f00cf26a0240ae5d1e2423c28407517b93a302d0fff3780939ae0a684522fb8",
+    "verification.json": "710875f0221f14071da9013967d8168c541478feeb0cb422e0c6f72be46537b1",
+    "README.md": "a4928d9efc25217abaaea53cc3af9bb9cede0d3f194313afd00471ba9f6fc0a0"
+  }
+}

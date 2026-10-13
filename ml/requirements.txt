@@ -1,0 +1,7 @@
+# Matching pair verified on install: torchvision 0.29.0 requires torch==2.14.0
+# Prefer the official selector for CUDA: https://pytorch.org/get-started/locally/
+torch==2.14.0
+torchvision==0.29.0
+Pillow>=10.0.0,<13
+matplotlib>=3.8.0,<4
+PyYAML>=6.0.0,<7

@@ -1,0 +1,93 @@
+{
+  "passed": true,
+  "sample_split": "val",
+  "sample_count": 4,
+  "sample_selection": "Validation manifest order. The first Fresh and Spoiled rows whose group_id values are all distinct, two of each label. The test split was not read.",
+  "samples": [
+    {
+      "label": "Fresh",
+      "group_sha256_12": "b52222853341",
+      "split": "val"
+    },
+    {
+      "label": "Fresh",
+      "group_sha256_12": "e3bd10fe4804",
+      "split": "val"
+    },
+    {
+      "label": "Spoiled",
+      "group_sha256_12": "47fa223be1c6",
+      "split": "val"
+    },
+    {
+      "label": "Spoiled",
+      "group_sha256_12": "1f6cda71325e",
+      "split": "val"
+    }
+  ],
+  "devices_for_export_parity": [
+    "cpu"
+  ],
+  "cpu_atol": 1e-05,
+  "identical_preprocessed_tensors": {
+    "max_abs_logit_difference": 0.0,
+    "max_abs_probability_difference": 0.0,
+    "class_mismatches": 0,
+    "output_shape": [
+      4,
+      2
+    ],
+    "tolerance_atol": 1e-05,
+    "dtype": "float32"
+  },
+  "single_image": {
+    "max_abs_logit_difference": 0.0,
+    "max_abs_probability_difference": 0.0,
+    "class_mismatches": 0,
+    "output_shape": [
+      1,
+      2
+    ],
+    "tolerance_atol": 1e-05,
+    "dtype": "float32"
+  },
+  "bundle_image_path_vs_reference_tensors": {
+    "max_abs_logit_difference": 0.0,
+    "max_abs_probability_difference": 0.0,
+    "class_mismatches": 0,
+    "output_shape": [
+      4,
+      2
+    ],
+    "tolerance_atol": 1e-05,
+    "dtype": "float32"
+  },
+  "synthetic_batch": {
+    "max_abs_logit_difference": 0.0,
+    "max_abs_probability_difference": 0.0,
+    "class_mismatches": 0,
+    "output_shape": [
+      2,
+      2
+    ],
+    "tolerance_atol": 1e-05,
+    "dtype": "float32"
+  },
+  "mps_smoke": {
+    "checked": true,
+    "images": 1,
+    "max_abs_logit_difference_vs_cpu": 1.9073486328125e-06,
+    "class_mismatch_vs_cpu": 0,
+    "note": "CPU and MPS are not claimed to be bitwise identical. This difference is not the export tolerance."
+  },
+  "class_mismatch_count": 0,
+  "fresh_process": {
+    "passed": true,
+    "checkpoint_path_not_passed": true,
+    "max_abs_logit_difference_vs_parent": 1.9073486328125e-06,
+    "output_shape": [
+      1,
+      2
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+[project]
+name = "freshnet-api"
+version = "0.1.0"
+description = "Local FastAPI service for FreshNet visual freshness estimates."
+requires-python = ">=3.10"
+readme = "../README.md"
+
+[tool.fastapi]
+entrypoint = "app.main:app"
+
+[tool.pytest.ini_options]
+pythonpath = ["backend", "ml"]
+testpaths = ["tests"]

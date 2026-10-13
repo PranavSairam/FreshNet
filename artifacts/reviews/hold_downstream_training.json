@@ -1,0 +1,7 @@
+{
+  "hold": true,
+  "reason": "Same-capture augmentations cross the active splits. Detail, fused, test evaluation, and export stay paused. Current context weights must not be reused on a corrected holdout.",
+  "created_at": "2026-10-09T13:35:00Z",
+  "preserves": "artifacts/checkpoints/context/",
+  "updated_at": "2026-10-09T13:55:00Z"
+}

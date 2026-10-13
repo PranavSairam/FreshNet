@@ -1,0 +1,6 @@
+{
+  "python": "3.12.15",
+  "torch": "2.14.0",
+  "torchvision": "0.29.0",
+  "platform": "macOS-26.6.2-arm64-arm-64bit"
+}

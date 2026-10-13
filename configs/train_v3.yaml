@@ -1,0 +1,90 @@
+# Fresh experiments on the verified source-image split.
+# Do not point this file at artifacts/checkpoints/context, detail, or fused.
+# Do not resume the provisional context run.
+
+experiment:
+  name: freshnet_binary_source_v3
+  expected_split_fingerprint: "4f2534505b3ca656e72b786046d0d7f7da1088a221fe857a3b16639bd87c8f57"
+
+task:
+  name: binary_visual_freshness
+  description: >
+    Binary visual freshness classification on the versioned source-image split.
+    The benchmark excludes unresolved and label-conflict images, so it is not
+    the full original dataset. Medium is not an active class.
+  labels:
+    Fresh: 0
+    Spoiled: 1
+  num_classes: 2
+  future_extension_labels:
+    - Medium
+
+data:
+  manifests_dir: data/processed/manifests_v3_source
+  train_csv: data/processed/manifests_v3_source/train.csv
+  val_csv: data/processed/manifests_v3_source/val.csv
+  test_csv: data/processed/manifests_v3_source/test.csv
+  fingerprint_json: data/processed/manifests_v3_source/split_fingerprint.json
+  class_mapping_json: data/processed/manifests_v3_source/class_mapping.json
+  require_fingerprint_match: true
+
+preprocessing:
+  context_size: 224
+  detail_size: 384
+  patch_size: 160
+  imagenet_mean: [0.485, 0.456, 0.406]
+  imagenet_std: [0.229, 0.224, 0.225]
+  train_augmentation:
+    horizontal_flip_p: 0.5
+    rotation_degrees: 12
+    color_jitter:
+      brightness: 0.08
+      contrast: 0.08
+      saturation: 0.05
+      hue: 0.01
+  eval_deterministic: true
+
+model:
+  architecture: fused
+  embedding_dim: 256
+  dropout: 0.3
+  context:
+    backbone: efficientnet_b0
+    pretrained: true
+  detail:
+    patch_layout: corners_center
+    channels: [32, 64, 128, 256]
+
+training:
+  seed: 42
+  batch_size: 16
+  num_workers: 0
+  epochs: 30
+  learning_rate: 0.0003
+  backbone_learning_rate: 0.00003
+  weight_decay: 0.0001
+  optimizer: adamw
+  scheduler: cosine
+  warmup_epochs: 0
+  freeze_backbone_epochs: 3
+  early_stopping_patience: 7
+  early_stopping_metric: val_macro_f1
+  use_class_weights: true
+  amp: true
+  device: auto
+  checkpoint_dir: artifacts/checkpoints/v3
+  smoke_checkpoint_dir: artifacts/checkpoints/v3_smoke
+  history_dir: artifacts/metrics/v3
+  smoke_history_dir: artifacts/metrics/v3_smoke
+  run_dir: artifacts/runs/v3
+  export_dir: artifacts/exports/v3
+  resume: null
+  smoke:
+    max_train_samples: 64
+    max_val_samples: 32
+    epochs: 1
+    batch_size: 4
+
+evaluation:
+  output_dir: artifacts/metrics/v3/eval
+  compare_architectures: [context, detail, fused]

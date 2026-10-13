@@ -1,0 +1,184 @@
+{
+  "bundle_schema_version": "freshnet.deployment.v1",
+  "model_version": "freshnet-v3-fused-epoch29-b962c650ed80",
+  "source_checkpoint": "artifacts/checkpoints/v3/fused/best.pt",
+  "source_checkpoint_sha256": "b962c650ed807f362885e1f6c240d8abc693f824980b3afbfe8f597cafd60200",
+  "exported_weights_sha256": "c29b015d3226ae21e847dbeba5cf7d5793d50da3b4bbe119d63c4a6e7e17f008",
+  "architecture": "fused",
+  "epoch": 29,
+  "smoke_test": false,
+  "dataset_fingerprint": "4f2534505b3ca656e72b786046d0d7f7da1088a221fe857a3b16639bd87c8f57",
+  "exported_at": "2026-10-13T14:24:43.700647+00:00",
+  "initialization": "context=imagenet_efficientnet_b0_DEFAULT;detail=scratch_detail_cnn",
+  "decision_rule": "argmax over the two output logits",
+  "probabilities": "softmax over the class dimension for display only",
+  "validation": {
+    "label": "validation results reused from training and the selection record; not recomputed",
+    "candidates": [
+      {
+        "architecture": "context",
+        "epoch": 19,
+        "val_macro_f1": 0.984695,
+        "val_accuracy": 0.98612,
+        "val_balanced_accuracy": 0.984159,
+        "val_spoiled_recall": 0.977697,
+        "val_spoiled_to_fresh_errors": 61,
+        "checkpoint": "artifacts/checkpoints/v3/context/best.pt",
+        "smoke_test": false,
+        "split_fingerprint": "4f2534505b3ca656e72b786046d0d7f7da1088a221fe857a3b16639bd87c8f57"
+      },
+      {
+        "architecture": "detail",
+        "epoch": 26,
+        "val_macro_f1": 0.932566,
+        "val_accuracy": 0.93875,
+        "val_balanced_accuracy": 0.932751,
+        "val_spoiled_recall": 0.91298,
+        "val_spoiled_to_fresh_errors": 238,
+        "checkpoint": "artifacts/checkpoints/v3/detail/best.pt",
+        "smoke_test": false,
+        "split_fingerprint": "4f2534505b3ca656e72b786046d0d7f7da1088a221fe857a3b16639bd87c8f57"
+      },
+      {
+        "architecture": "fused",
+        "epoch": 29,
+        "val_macro_f1": 0.985118,
+        "val_accuracy": 0.986502,
+        "val_balanced_accuracy": 0.984622,
+        "val_spoiled_recall": 0.978428,
+        "val_spoiled_to_fresh_errors": 59,
+        "checkpoint": "artifacts/checkpoints/v3/fused/best.pt",
+        "smoke_test": false,
+        "split_fingerprint": "4f2534505b3ca656e72b786046d0d7f7da1088a221fe857a3b16639bd87c8f57"
+      }
+    ],
+    "selected_checkpoint": {
+      "n": 7853,
+      "accuracy": 0.986502,
+      "balanced_accuracy": 0.984622,
+      "macro_f1": 0.985118,
+      "per_class": {
+        "Fresh": {
+          "precision": 0.988499,
+          "recall": 0.990817,
+          "f1": 0.989657,
+          "support": 5118
+        },
+        "Spoiled": {
+          "precision": 0.98274,
+          "recall": 0.978428,
+          "f1": 0.980579,
+          "support": 2735
+        }
+      },
+      "confusion_matrix": [
+        [
+          5071,
+          47
+        ],
+        [
+          59,
+          2676
+        ]
+      ],
+      "confusion_matrix_normalized": [
+        [
+          0.990817,
+          0.009183
+        ],
+        [
+          0.021572,
+          0.978428
+        ]
+      ],
+      "spoiled_to_fresh_errors": 59,
+      "spoiled_test_images": 2735,
+      "spoiled_to_fresh_rate": 0.021572,
+      "label_distribution_true": {
+        "0": 5118,
+        "1": 2735
+      },
+      "label_distribution_pred": {
+        "0": 5130,
+        "1": 2723
+      }
+    }
+  },
+  "test": {
+    "label": "completed test evaluation reused; the test set was not rescored",
+    "metrics": {
+      "n": 8035,
+      "accuracy": 0.983323,
+      "balanced_accuracy": 0.979706,
+      "macro_f1": 0.981337,
+      "per_class": {
+        "Fresh": {
+          "precision": 0.983916,
+          "recall": 0.990959,
+          "f1": 0.987425,
+          "support": 5309
+        },
+        "Spoiled": {
+          "precision": 0.982143,
+          "recall": 0.968452,
+          "f1": 0.975249,
+          "support": 2726
+        }
+      },
+      "confusion_matrix": [
+        [
+          5261,
+          48
+        ],
+        [
+          86,
+          2640
+        ]
+      ],
+      "confusion_matrix_normalized": [
+        [
+          0.990959,
+          0.009041
+        ],
+        [
+          0.031548,
+          0.968452
+        ]
+      ],
+      "spoiled_to_fresh_errors": 86,
+      "spoiled_test_images": 2726,
+      "spoiled_to_fresh_rate": 0.031548,
+      "label_distribution_true": {
+        "0": 5309,
+        "1": 2726
+      },
+      "label_distribution_pred": {
+        "0": 5347,
+        "1": 2688
+      },
+      "checkpoint": "artifacts/checkpoints/v3/fused/best.pt",
+      "architecture": "fused",
+      "split": "test",
+      "split_fingerprint": "4f2534505b3ca656e72b786046d0d7f7da1088a221fe857a3b16639bd87c8f57",
+      "smoke_test": false,
+      "evaluated_at": "2026-10-12T08:19:47.763465+00:00",
+      "decision_rule": "argmax class; no threshold tuning",
+      "preprocessing_eval": "deterministic resize and ImageNet normalization; train augmentation disabled",
+      "note": "Test split metrics are for final reporting only and must not be used for tuning."
+    }
+  },
+  "benchmark_limitations": [
+    "The v3 benchmark includes 53,052 of 71,318 original images. 18,266 images were quarantined.",
+    "Confirmed retained same-capture links have zero cross-split crossings.",
+    "Duplicate candidate search was capped at 64 comparisons per image in an average-hash band and is not exhaustive. Specimen and capture-session metadata are incomplete.",
+    "Reported scores apply to the included v3 benchmark. The dataset is not conclusively leakage-free.",
+    "Image predictions are visual estimates. They do not certify food safety, remaining shelf life, or a calibrated freshness percentage.",
+    "There is no Medium class and no tuned decision threshold."
+  ],
+  "runtime": {
+    "python": "3.12.15",
+    "torch": "2.14.0",
+    "torchvision": "0.29.0",
+    "platform": "macOS-26.6.2-arm64-arm-64bit"
+  }
+}

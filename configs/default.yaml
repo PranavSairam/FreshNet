@@ -1,0 +1,28 @@
+project:
+  name: FreshNet
+  version: 0.2.0
+  description: Binary visual food freshness classification with dual-path neural networks.
+
+task:
+  type: binary_visual_freshness
+  labels:
+    Fresh: 0
+    Spoiled: 1
+  future_extension:
+    - Medium
+
+model:
+  architecture: fused  # context | detail | fused
+  checkpoint_path: artifacts/checkpoints/freshnet.pt
+
+dataset:
+  config_path: configs/dataset.yaml
+  train_config_path: configs/train.yaml
+  processed_manifests_dir: data/processed/manifests
+  note: >
+    Local data/Dataset is Fresh vs Rotten→Spoiled only. Medium is absent.
+
+api:
+  host: 127.0.0.1
+  port: 8000
+  sqlite_path: data/local/freshnet.sqlite

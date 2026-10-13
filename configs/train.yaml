@@ -1,0 +1,102 @@
+# FreshNet full-training configuration (binary visual freshness)
+# Expected split fingerprint must match data/processed/manifests/split_fingerprint.json
+
+experiment:
+  name: freshnet_binary_full_v1
+  expected_split_fingerprint: "005d750025b30ce1074333714f7e2ee7b89cc0ec9acd4ba56f62010edd5850f9"
+
+task:
+  name: binary_visual_freshness
+  description: >
+    Binary visual freshness classification. Medium is a documented future
+    extension only and is not an active training or inference class.
+  labels:
+    Fresh: 0
+    Spoiled: 1
+  num_classes: 2
+  future_extension_labels:
+    - Medium
+
+data:
+  manifests_dir: data/processed/manifests
+  train_csv: data/processed/manifests/train.csv
+  val_csv: data/processed/manifests/val.csv
+  test_csv: data/processed/manifests/test.csv
+  fingerprint_json: data/processed/manifests/split_fingerprint.json
+  class_mapping_json: data/processed/manifests/class_mapping.json
+  require_fingerprint_match: true
+
+preprocessing:
+  context_size: 224
+  detail_size: 384
+  patch_size: 160
+  imagenet_mean: [0.485, 0.456, 0.406]
+  imagenet_std: [0.229, 0.224, 0.225]
+  train_augmentation:
+    horizontal_flip_p: 0.5
+    rotation_degrees: 12
+    color_jitter:
+      brightness: 0.08
+      contrast: 0.08
+      saturation: 0.05
+      hue: 0.01
+  eval_deterministic: true
+
+model:
+  architecture: fused
+  embedding_dim: 256
+  dropout: 0.3
+  context:
+    backbone: efficientnet_b0
+    # Prefer ImageNet init when weights resolve; trainer records actual outcome.
+    pretrained: true
+  detail:
+    patch_layout: corners_center
+    channels: [32, 64, 128, 256]
+
+training:
+  seed: 42
+  batch_size: 16
+  num_workers: 0
+  epochs: 30
+  # Head / newly initialized layers
+  learning_rate: 0.0003
+  # Backbone fine-tune LR after unfreeze (pretrained context/fused)
+  backbone_learning_rate: 0.00003
+  weight_decay: 0.0001
+  optimizer: adamw
+  scheduler: cosine
+  warmup_epochs: 0
+  freeze_backbone_epochs: 3
+  early_stopping_patience: 7
+  early_stopping_metric: val_macro_f1
+  use_class_weights: true
+  amp: true  # applied on CUDA; MPS/CPU use float32
+  device: auto  # auto prefers cuda, then mps, then cpu
+  checkpoint_dir: artifacts/checkpoints
+  smoke_checkpoint_dir: artifacts/checkpoints/smoke
+  history_dir: artifacts/metrics
+  smoke_history_dir: artifacts/metrics/smoke
+  run_dir: artifacts/runs
+  export_dir: artifacts/exports
+  resume: null
+  smoke:
+    max_train_samples: 64
+    max_val_samples: 32
+    epochs: 1
+    batch_size: 4
+
+evaluation:
+  output_dir: artifacts/metrics/eval
+  compare_architectures: [context, detail, fused]
+
+integrity:
+  hash_cache_path: data/processed/cache/image_hashes.jsonl
+  near_candidate_pairs_path: data/processed/reports/near_duplicate_candidates.csv
+  integrity_report_path: data/processed/reports/integrity_audit.json
+  near_hash_size: 8
+  near_hamming_threshold: 5
+  near_band_prefix_hex_chars: 3
+  near_max_candidates_per_image: 64
+  near_representative_pairs_limit: 200
+  near_affects_splits: false

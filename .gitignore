@@ -1,0 +1,66 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Datasets, uploads, and local databases
+data/raw/
+data/Dataset/
+data/processed/
+data/uploads/
+data/local/
+!data/fixtures/
+!data/fixtures/**
+uploads/
+*.sqlite
+*.sqlite3
+*.db
+
+# Dataset preparation outputs (keep fixtures tracked)
+data/processed/**
+!data/fixtures/**
+
+# Model checkpoints and large artifacts
+artifacts/checkpoints/
+artifacts/metrics/
+artifacts/logs/
+artifacts/runs/
+*.pt
+# The verified deployment bundle is small enough to keep with the app.
+!artifacts/deployment/
+!artifacts/deployment/**
+!artifacts/deployment/**/*.pt
+*.pth
+*.ckpt
+*.onnx
+*.h5
+*.pkl
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

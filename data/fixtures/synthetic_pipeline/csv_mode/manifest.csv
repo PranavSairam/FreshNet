@@ -1,0 +1,7 @@
+image_path,label,food_type,specimen_id,capture_session,source,fixture
+data/fixtures/synthetic_pipeline/csv_mode/images/img_a.png,Fresh,apple,specA,sess1,synthetic_fixture,true
+data/fixtures/synthetic_pipeline/csv_mode/images/img_b.png,Fresh,apple,specA,sess1,synthetic_fixture,true
+data/fixtures/synthetic_pipeline/csv_mode/images/img_c.png,Rotten,apple,specB,sess2,synthetic_fixture,true
+data/fixtures/synthetic_pipeline/csv_mode/images/img_d.png,Spoiled,banana,specC,sess3,synthetic_fixture,true
+data/fixtures/synthetic_pipeline/csv_mode/images/missing.png,Fresh,apple,specMissing,sessX,synthetic_fixture,true
+data/fixtures/synthetic_pipeline/csv_mode/images/bad_label.png,AlmostFresh,apple,specBad,sessY,synthetic_fixture,true

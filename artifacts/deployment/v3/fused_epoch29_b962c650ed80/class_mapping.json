@@ -1,0 +1,9 @@
+{
+  "Fresh": 0,
+  "Spoiled": 1,
+  "num_classes": 2,
+  "label_order": [
+    "Fresh",
+    "Spoiled"
+  ]
+}
