@@ -64,3 +64,6 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# design tooling working files
+.taste-skill/

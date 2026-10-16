@@ -1,39 +1,32 @@
-import { Leaf } from "lucide-react";
-
 const links = [
   ["Home", "#home"],
   ["Analyze", "#analyze"],
-  ["How it works", "#how-it-works"],
-  ["Performance", "#performance"],
-  ["About", "#about"],
+  ["How It Works", "#how-it-works"],
+  ["Model Performance", "#performance"],
+  ["About / Team", "#about"],
 ] as const;
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-10 border-b border-stone-200 bg-[#f6f5f2]/95 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-5 py-4">
-        <a href="#home" className="flex items-center gap-3 rounded-lg">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1f4d3a] text-white">
-            <Leaf size={20} aria-hidden="true" />
-          </span>
-          <span>
-            <span className="block text-xs font-medium uppercase tracking-[0.16em] text-[#1f4d3a]">
-              Visual freshness
-            </span>
-            <span className="font-serif text-2xl text-stone-900">FreshNet</span>
-          </span>
+    <header className="sticky top-0 z-30 bg-[var(--bg)]">
+      <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-x-6 gap-y-1 px-[var(--margin)] py-3">
+        <a href="#home" className="display text-[length:var(--step-lead)] leading-none text-[var(--ink)]">
+          FreshNet
         </a>
-        <nav aria-label="Page sections" className="flex flex-wrap gap-1 text-sm">
+        <nav aria-label="Page sections" className="order-3 -mx-2 flex w-full flex-wrap gap-x-1 md:order-none md:mx-0 md:w-auto">
           {links.map(([label, href]) => (
             <a
               key={href}
               href={href}
-              className="rounded-full px-3 py-2 text-stone-700 hover:bg-white hover:text-[#1f4d3a]"
+              className="link shrink-0 px-2 py-2 text-[length:var(--step-small)] text-[var(--ink)]"
             >
               {label}
             </a>
           ))}
         </nav>
+        <a href="#analyze" className="button hidden sm:inline-flex">
+          Try a photo
+        </a>
       </div>
     </header>
   );

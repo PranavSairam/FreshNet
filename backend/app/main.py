@@ -8,10 +8,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
 from app.api.predict import router as predict_router
+from app.api.produce import router as produce_router
 from app.core.config import get_settings
 from app.core.errors import register_exception_handlers
 from app.core.logging import configure_logging
 from app.db.sqlite import initialize_database
+from app.services.produce import load_catalogue
 from app.services.runtime import load_model
 
 logger = logging.getLogger("freshnet")
@@ -22,6 +24,7 @@ async def lifespan(_app: FastAPI):
     settings = get_settings()
     configure_logging(settings)
     initialize_database(settings.sqlite_file)
+    load_catalogue()  # fail fast if the guidance catalogue is malformed
     load_model(settings)
     logger.info("FreshNet API started", extra={"environment": settings.environment})
     yield
@@ -45,6 +48,7 @@ def create_app() -> FastAPI:
     register_exception_handlers(application)
     application.include_router(health_router, prefix="/api", tags=["health"])
     application.include_router(predict_router, prefix="/api", tags=["predict"])
+    application.include_router(produce_router, prefix="/api", tags=["produce"])
 
     @application.get("/", tags=["health"])
     def root() -> dict[str, str]:

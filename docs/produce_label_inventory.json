@@ -1,0 +1,392 @@
+{
+  "source": "data/processed/manifests_v3_source (v3 split fingerprint; metadata only)",
+  "included_images": 53052,
+  "excluded_images": 18266,
+  "produce_types": 13,
+  "rows_missing_food_type": 0,
+  "rows_with_unmapped_folder": 0,
+  "excluded_rows_unmapped": 0,
+  "folder_prefix_vs_freshness_label_conflicts": 0,
+  "content_hashes_under_multiple_produce_types": 0,
+  "source_groups_spanning_multiple_produce_types": 1,
+  "source_groups_crossing_splits": 0,
+  "cross_produce_group_details": [
+    [
+      {
+        "folder": "RottenBellpepper",
+        "split": "train",
+        "image": "Rotten/RottenBellpepper/rottenPepper (488).jpg"
+      },
+      {
+        "folder": "RottenCarrot",
+        "split": "train",
+        "image": "Rotten/RottenCarrot/rottenCarrot (65).jpg"
+      }
+    ]
+  ],
+  "spelling_variants": {
+    "okra": [
+      "Okara",
+      "Okra"
+    ],
+    "capsicum": [
+      "Capciscum",
+      "Capsicum"
+    ]
+  },
+  "produce": [
+    {
+      "produce": "apple",
+      "folder_spellings": [
+        "Apple"
+      ],
+      "included_total": 6452,
+      "included_fresh": 2594,
+      "included_spoiled": 3858,
+      "excluded_total": 1416,
+      "splits": {
+        "train": {
+          "Fresh": 1733,
+          "Spoiled": 2832,
+          "total": 4565
+        },
+        "val": {
+          "Fresh": 395,
+          "Spoiled": 492,
+          "total": 887
+        },
+        "test": {
+          "Fresh": 466,
+          "Spoiled": 534,
+          "total": 1000
+        }
+      }
+    },
+    {
+      "produce": "banana",
+      "folder_spellings": [
+        "Banana"
+      ],
+      "included_total": 5210,
+      "included_fresh": 2318,
+      "included_spoiled": 2892,
+      "excluded_total": 2301,
+      "splits": {
+        "train": {
+          "Fresh": 1690,
+          "Spoiled": 1977,
+          "total": 3667
+        },
+        "val": {
+          "Fresh": 328,
+          "Spoiled": 505,
+          "total": 833
+        },
+        "test": {
+          "Fresh": 300,
+          "Spoiled": 410,
+          "total": 710
+        }
+      }
+    },
+    {
+      "produce": "bell_pepper",
+      "folder_spellings": [
+        "Bellpepper"
+      ],
+      "included_total": 1078,
+      "included_fresh": 528,
+      "included_spoiled": 550,
+      "excluded_total": 124,
+      "splits": {
+        "train": {
+          "Fresh": 384,
+          "Spoiled": 383,
+          "total": 767
+        },
+        "val": {
+          "Fresh": 75,
+          "Spoiled": 96,
+          "total": 171
+        },
+        "test": {
+          "Fresh": 69,
+          "Spoiled": 71,
+          "total": 140
+        }
+      }
+    },
+    {
+      "produce": "bitter_gourd",
+      "folder_spellings": [
+        "Bittergroud"
+      ],
+      "included_total": 680,
+      "included_fresh": 323,
+      "included_spoiled": 357,
+      "excluded_total": 4,
+      "splits": {
+        "train": {
+          "Fresh": 235,
+          "Spoiled": 234,
+          "total": 469
+        },
+        "val": {
+          "Fresh": 46,
+          "Spoiled": 46,
+          "total": 92
+        },
+        "test": {
+          "Fresh": 42,
+          "Spoiled": 77,
+          "total": 119
+        }
+      }
+    },
+    {
+      "produce": "capsicum",
+      "folder_spellings": [
+        "Capciscum",
+        "Capsicum"
+      ],
+      "included_total": 1879,
+      "included_fresh": 986,
+      "included_spoiled": 893,
+      "excluded_total": 12,
+      "splits": {
+        "train": {
+          "Fresh": 693,
+          "Spoiled": 637,
+          "total": 1330
+        },
+        "val": {
+          "Fresh": 141,
+          "Spoiled": 135,
+          "total": 276
+        },
+        "test": {
+          "Fresh": 152,
+          "Spoiled": 121,
+          "total": 273
+        }
+      }
+    },
+    {
+      "produce": "carrot",
+      "folder_spellings": [
+        "Carrot"
+      ],
+      "included_total": 10434,
+      "included_fresh": 8285,
+      "included_spoiled": 2149,
+      "excluded_total": 1884,
+      "splits": {
+        "train": {
+          "Fresh": 5779,
+          "Spoiled": 1493,
+          "total": 7272
+        },
+        "val": {
+          "Fresh": 1200,
+          "Spoiled": 296,
+          "total": 1496
+        },
+        "test": {
+          "Fresh": 1306,
+          "Spoiled": 360,
+          "total": 1666
+        }
+      }
+    },
+    {
+      "produce": "cucumber",
+      "folder_spellings": [
+        "Cucumber"
+      ],
+      "included_total": 1289,
+      "included_fresh": 764,
+      "included_spoiled": 525,
+      "excluded_total": 829,
+      "splits": {
+        "train": {
+          "Fresh": 540,
+          "Spoiled": 351,
+          "total": 891
+        },
+        "val": {
+          "Fresh": 108,
+          "Spoiled": 82,
+          "total": 190
+        },
+        "test": {
+          "Fresh": 116,
+          "Spoiled": 92,
+          "total": 208
+        }
+      }
+    },
+    {
+      "produce": "mango",
+      "folder_spellings": [
+        "Mango"
+      ],
+      "included_total": 1060,
+      "included_fresh": 530,
+      "included_spoiled": 530,
+      "excluded_total": 138,
+      "splits": {
+        "train": {
+          "Fresh": 361,
+          "Spoiled": 369,
+          "total": 730
+        },
+        "val": {
+          "Fresh": 87,
+          "Spoiled": 91,
+          "total": 178
+        },
+        "test": {
+          "Fresh": 82,
+          "Spoiled": 70,
+          "total": 152
+        }
+      }
+    },
+    {
+      "produce": "okra",
+      "folder_spellings": [
+        "Okara",
+        "Okra"
+      ],
+      "included_total": 529,
+      "included_fresh": 347,
+      "included_spoiled": 182,
+      "excluded_total": 444,
+      "splits": {
+        "train": {
+          "Fresh": 246,
+          "Spoiled": 131,
+          "total": 377
+        },
+        "val": {
+          "Fresh": 55,
+          "Spoiled": 23,
+          "total": 78
+        },
+        "test": {
+          "Fresh": 46,
+          "Spoiled": 28,
+          "total": 74
+        }
+      }
+    },
+    {
+      "produce": "orange",
+      "folder_spellings": [
+        "Orange"
+      ],
+      "included_total": 10337,
+      "included_fresh": 8475,
+      "included_spoiled": 1862,
+      "excluded_total": 3786,
+      "splits": {
+        "train": {
+          "Fresh": 5925,
+          "Spoiled": 1290,
+          "total": 7215
+        },
+        "val": {
+          "Fresh": 1240,
+          "Spoiled": 317,
+          "total": 1557
+        },
+        "test": {
+          "Fresh": 1310,
+          "Spoiled": 255,
+          "total": 1565
+        }
+      }
+    },
+    {
+      "produce": "potato",
+      "folder_spellings": [
+        "Potato"
+      ],
+      "included_total": 1800,
+      "included_fresh": 755,
+      "included_spoiled": 1045,
+      "excluded_total": 738,
+      "splits": {
+        "train": {
+          "Fresh": 506,
+          "Spoiled": 710,
+          "total": 1216
+        },
+        "val": {
+          "Fresh": 125,
+          "Spoiled": 168,
+          "total": 293
+        },
+        "test": {
+          "Fresh": 124,
+          "Spoiled": 167,
+          "total": 291
+        }
+      }
+    },
+    {
+      "produce": "strawberry",
+      "folder_spellings": [
+        "Strawberry"
+      ],
+      "included_total": 873,
+      "included_fresh": 326,
+      "included_spoiled": 547,
+      "excluded_total": 326,
+      "splits": {
+        "train": {
+          "Fresh": 228,
+          "Spoiled": 387,
+          "total": 615
+        },
+        "val": {
+          "Fresh": 53,
+          "Spoiled": 83,
+          "total": 136
+        },
+        "test": {
+          "Fresh": 45,
+          "Spoiled": 77,
+          "total": 122
+        }
+      }
+    },
+    {
+      "produce": "tomato",
+      "folder_spellings": [
+        "Tomato"
+      ],
+      "included_total": 11431,
+      "included_fresh": 8290,
+      "included_spoiled": 3141,
+      "excluded_total": 6264,
+      "splits": {
+        "train": {
+          "Fresh": 5774,
+          "Spoiled": 2276,
+          "total": 8050
+        },
+        "val": {
+          "Fresh": 1265,
+          "Spoiled": 401,
+          "total": 1666
+        },
+        "test": {
+          "Fresh": 1251,
+          "Spoiled": 464,
+          "total": 1715
+        }
+      }
+    }
+  ]
+}

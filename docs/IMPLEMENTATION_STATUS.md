@@ -104,6 +104,18 @@ One test pass of that checkpoint, argmax only, on all 8,035 v3 test images: accu
 - Unresolved structural pairs and conflicting-label groups stay out of the v3 benchmark. The candidate search is capped at 64 comparisons per image in a hash band. That is not a claim that every same-capture pair was found.
 - The selected fused checkpoint is exported at `artifacts/deployment/v3/fused_epoch29_b962c650ed80` (model version `freshnet-v3-fused-epoch29-b962c650ed80`). The local API loads that bundle at startup and serves `POST /api/predict`. The website is the Vite app in `frontend/`.
 
+## Produce identity, combined labels and guidance (2026-10-16)
+
+Added on top of the unchanged freshness model. Details: `docs/PRODUCE_IDENTIFICATION_AND_GUIDANCE.md`.
+
+- Produce identity is **selected by the user**. No produce classifier exists. There is no unknown / non-produce detector.
+- Results read "Predicted: Fresh banana" or "Predicted: Spoiled apple", and "Predicted: Fresh produce" when identity is unknown.
+- Spoilage severity is always "Not assessed". A proposal for genuine severity prediction is in `docs/SEVERITY_PROPOSAL.md`. Nothing from it is implemented.
+- Guidance comes from `backend/app/data/guidance_catalogue.json` (version 2026-10-16.1). Reviewed storage guidance covers 11 produce types. Bitter gourd is awaiting review. Unknown / other gets general advice.
+- `POST /api/predict` keeps its legacy fields and adds `produce`, `freshness`, `severity`, `guidance`, `combined_label` and `contract_version`. New endpoints: `GET /api/produce`, `GET /api/guidance`.
+- Produce label audit: `docs/PRODUCE_LABEL_INVENTORY.md`, produced by `ml/audit_produce_labels.py` (metadata only).
+- Tests: `tests/backend/test_produce_guidance.py`. No retraining, rescoring or threshold change took place, and the original-split hold file is untouched.
+
 ## Scripts / Colab
 
 - `scripts/continue_training.sh` resumes `last.pt` per architecture, skips `complete.json`, and stops on failure

@@ -1,0 +1,449 @@
+==============================================================================
+FRESHNET - PROJECT AND MODEL REFERENCE
+==============================================================================
+
+Team (academic project)
+  PRANAV SAIRAM      RA2311026010195
+  SANTHOSH G         RA2311026010196
+  V T S MUKUNDAN     RA2311026010209
+
+This file describes what FreshNet is, how the model was built and chosen, what
+it scored, how it is deployed, and what it can and cannot be trusted to say.
+All numbers below are copied from recorded artifacts in this repository (see
+section 12). Nothing here was recomputed or invented.
+
+
+------------------------------------------------------------------------------
+1. WHAT FRESHNET IS
+------------------------------------------------------------------------------
+FreshNet looks at ONE photo of a fruit or vegetable and answers with one of two
+labels:
+
+    Fresh   (class index 0)
+    Spoiled (class index 1)
+
+It is a local, academic monorepo containing:
+  - a data pipeline (dataset preparation, integrity audit, split building)
+  - a training and evaluation pipeline (PyTorch)
+  - a deployment exporter (versioned weights bundle)
+  - an HTTP API (FastAPI) that loads the exported model once at startup
+  - a website (React + Vite + Tailwind) with an upload-and-analyze page
+
+The answer is a VISUAL ESTIMATE ONLY. It is not a food-safety check, a shelf-life
+estimate, or a freshness percentage (see section 13).
+
+There is NO "Medium" class. Medium freshness is a possible future extension and
+is not implemented or claimed anywhere.
+
+
+------------------------------------------------------------------------------
+2. THE MODEL IN ONE PARAGRAPH
+------------------------------------------------------------------------------
+The deployed model is "FusedFreshNet". It reads each photo two ways at once:
+  - a CONTEXT branch (EfficientNet-B0) looks at the whole picture at 224x224
+  - a DETAIL branch (a small CNN trained from scratch) looks at five close-up
+    160x160 patches (four corners + centre) cut from a 384x384 version
+The two summaries (256 numbers each) are joined, normalised, and turned into
+two scores (logits): one for Fresh, one for Spoiled. The larger score is the
+label (argmax). There is no tuned threshold.
+
+
+------------------------------------------------------------------------------
+3. ARCHITECTURE DETAIL
+------------------------------------------------------------------------------
+Context branch
+  - torchvision EfficientNet-B0
+  - Initialised from ImageNet weights at TRAINING time. The trained weights are
+    stored inside the exported state_dict, so inference builds the network with
+    pretrained=False and never downloads anything.
+  - Input: whole image resized to 224x224 (taken from the 384x384 image)
+  - Output: 256-dimensional embedding
+
+Detail branch
+  - Small convolutional network trained from scratch (no pretrained weights)
+  - Input: five 160x160 patches (four corners, then centre) from the 384x384
+    image
+  - Each patch gets an embedding; the five embeddings are averaged, then a
+    Linear + ReLU gives a 256-dimensional embedding
+
+Fusion head
+  - Concatenate 256 + 256 = 512 numbers
+  - LayerNorm -> Dropout(0.3) -> Linear -> 2 logits [Fresh, Spoiled]
+
+Decision rule
+  - argmax over the two logits
+  - Softmax over the class dimension is used ONLY to show probabilities on the
+    website. The label never depends on a threshold.
+
+Why two branches: the context branch sees overall colour/shape; the detail
+branch focuses on local texture such as mould, bruises, and wrinkling.
+
+
+------------------------------------------------------------------------------
+4. INPUT PREPROCESSING (FROZEN - TRAINING EVAL AND DEPLOYMENT SHARE ONE PATH)
+------------------------------------------------------------------------------
+  1. Open image with PIL, convert to RGB (no EXIF auto-rotation applied)
+  2. Resize to 384x384 (bilinear, antialiased) - this squares the image; it
+     does not crop or preserve aspect ratio
+  3. Context view: resize that 384x384 image to 224x224 (bilinear)
+  4. Detail patches: five 160x160 crops from the 384x384 image
+       - four corners, then the centre
+       - as shares of the square: corners at 0% and 58.33%, centre at 29.17%,
+         each patch 41.67% wide/tall
+  5. ToTensor, then ImageNet normalisation, once per branch input
+       mean [0.485, 0.456, 0.406]   std [0.229, 0.224, 0.225]
+  6. No augmentation at inference. Evaluation is deterministic.
+
+Training-time augmentation (NOT used at inference): horizontal flip p=0.5,
+rotation up to 12 degrees, light colour jitter (brightness/contrast 0.08,
+saturation 0.05, hue 0.01).
+
+The website draws the same five patch boxes over your uploaded photo so you can
+see which regions the detail branch reads.
+
+
+------------------------------------------------------------------------------
+5. DATASET AND SPLITS
+------------------------------------------------------------------------------
+Task: binary visual classification, Fresh vs Spoiled, of fruit and vegetable
+images.
+
+Source collection: 71,318 images in the original dataset.
+Benchmark used ("v3"): 53,052 images INCLUDED; 18,266 images QUARANTINED
+(listed in exclusions.csv) because they could not be trusted for a clean
+split. The quarantine and the manifests are in data/processed/manifests_v3_source/.
+
+Split sizes (v3):
+  train  37,164   Fresh 24,094   Spoiled 13,070
+  val     7,853   Fresh  5,118   Spoiled  2,735
+  test    8,035   Fresh  5,309   Spoiled  2,726
+
+Split fingerprint (v3):
+  4f2534505b3ca656e72b786046d0d7f7da1088a221fe857a3b16639bd87c8f57
+
+Leakage handling and its limits (be honest about these):
+  - Confirmed same-capture links (images of the same specimen/capture) were
+    kept within one split: zero cross-split crossings among confirmed links.
+  - The near-duplicate candidate search was CAPPED at 64 comparisons per image
+    inside an average-hash band. It is NOT exhaustive.
+  - Therefore FreshNet does NOT claim the benchmark is leakage-free.
+  - Specimen-level metadata was not available, so leakage-free cannot be
+    claimed.
+
+The dataset itself (about 6.6 GB) is NOT in the git repository.
+
+
+------------------------------------------------------------------------------
+6. TRAINING
+------------------------------------------------------------------------------
+Hardware/software: Apple M5 (no CUDA), PyTorch 2.14.0, torchvision 0.29.0,
+Python 3.12.15, float32 on MPS (mixed precision is CUDA-only and was not used).
+
+Recipe (all three models, config: configs/train_v3.yaml):
+  - Optimiser: AdamW, cosine learning-rate schedule
+  - Backbone frozen for the first 3 epochs, then two learning rates:
+      head 3e-4, backbone 3e-5
+  - Batch size 16, seed 42, class weights to offset Fresh/Spoiled imbalance
+  - Maximum 30 epochs, early stopping patience 7 on VALIDATION macro F1
+  - Checkpoints saved at epoch end; best-by-validation kept
+
+Three models were trained and compared:
+  CONTEXT  (EfficientNet-B0 branch alone)   26 epochs, early-stopped, ~4.48 h
+  DETAIL   (patch CNN alone)                30 epochs, ~2.81 h
+  FUSED    (both branches joined)           30 epochs, ~6.21 h
+Whole v3 run: about 18 h 20 min wall clock
+  (2026-10-11T13:50:04Z to 2026-10-12T08:10:25Z).
+
+An earlier "original split" run (fingerprint 005d7500...50f9) exists but is
+HELD and is not used for any final result. It is kept for the record only and
+its scores must never be compared with v3 as an "improvement" or "decline".
+
+
+------------------------------------------------------------------------------
+7. MODEL SELECTION (DONE ON VALIDATION ONLY)
+------------------------------------------------------------------------------
+Rule fixed in advance: highest validation macro F1; Spoiled recall breaks ties.
+No tuning on the test set. No threshold tuning.
+
+  Model     Best epoch  Val macro F1  Val accuracy  Val Spoiled recall  Spoiled->Fresh errors
+  Context       19        0.984695       0.986120        0.977697             61
+  Detail        26        0.932566       0.938750        0.912980            238
+  Fused         29        0.985118       0.986502        0.978428             59
+
+SELECTED: Fused, epoch 29 (margin over Context is only 0.000423).
+It was selected because it wins the frozen rule, not because it is "fused".
+Detail is clearly weaker alone.
+
+Selected checkpoint SHA-256:
+  b962c650ed807f362885e1f6c240d8abc693f824980b3afbfe8f597cafd60200
+The selection record was written BEFORE the test set was scored.
+
+
+------------------------------------------------------------------------------
+8. FINAL TEST RESULTS (SELECTED FUSED MODEL, SCORED ONCE)
+------------------------------------------------------------------------------
+Only the selected model was scored on the test set, once, using argmax.
+Context and Detail were NOT scored on test.
+
+  Images                    8,035
+  Accuracy                  0.983323  (98.33%)
+  Balanced accuracy         0.979706
+  Macro F1                  0.981337
+  Spoiled recall            0.968452
+  Spoiled predicted Fresh   86 of 2,726   (rate 0.031548)
+
+Per class
+  Fresh    precision 0.983916   recall 0.990959   F1 0.987425   support 5,309
+  Spoiled  precision 0.982143   recall 0.968452   F1 0.975249   support 2,726
+
+Confusion matrix (rows = actual, columns = predicted; order Fresh, Spoiled)
+                    Pred Fresh   Pred Spoiled
+  Actual Fresh         5,261          48
+  Actual Spoiled          86       2,640
+
+How to read this:
+  - The model is a bit more likely to call a Spoiled item Fresh (3.15%) than a
+    Fresh item Spoiled (0.90%). A Spoiled->Fresh mistake is the more serious
+    kind, so this is the number to watch.
+  - 98.33% is a result on THIS held-out benchmark. It is not the probability
+    that your next photo will be classified correctly. Real photos (lighting,
+    background, angle, camera, produce types) can differ from the benchmark.
+
+
+------------------------------------------------------------------------------
+9. DEPLOYED MODEL BUNDLE
+------------------------------------------------------------------------------
+Location: artifacts/deployment/v3/fused_epoch29_b962c650ed80/
+Schema:   freshnet.deployment.v1
+Version:  freshnet-v3-fused-epoch29-b962c650ed80
+
+Files: weights.pt (about 19 MB, eager PyTorch state_dict ONLY), architecture.json,
+class_mapping.json, preprocessing.json, metadata.json, runtime.json,
+verification.json, checksums.json, README.md
+
+Weights SHA-256:
+  c29b015d3226ae21e847dbeba5cf7d5793d50da3b4bbe119d63c4a6e7e17f008
+
+Export checks that were run:
+  - Source identity: SHA, fused architecture, epoch 29, non-smoke, split
+    fingerprint, class mapping
+  - CPU parity: source checkpoint vs exported bundle on 4 distinct-group
+    validation images plus a synthetic batch of 2 - max absolute logit and
+    probability difference 0, 0 class mismatches, tolerance 1e-5 (not loosened)
+  - Fresh-process reload: logit difference vs parent about 1.9e-6 (JSON
+    rounding), still under 1e-5
+  - MPS smoke test vs CPU: max logit difference 1.9e-6, 0 class mismatches
+    (close, not bitwise identical)
+  - Strict state_dict load, eval mode, inference_mode, checksums verified,
+    no ImageNet download at load time
+
+Format choice: plain PyTorch state_dict (not ONNX, not TorchScript).
+
+
+------------------------------------------------------------------------------
+10. HTTP API (BACKEND)
+------------------------------------------------------------------------------
+Stack: FastAPI + Uvicorn, SQLite (local). Env prefix FRESHNET_.
+
+Startup: loads the bundle ONCE (settings: FRESHNET_BUNDLE_DIR, FRESHNET_DEVICE,
+default device cpu). Inference runs under a lock in a worker thread.
+
+Endpoints
+  GET  /api/health    API status, model status (available / ready|unavailable,
+                      message, architecture, model_version), database status
+                      (path reported only as "local-sqlite")
+  POST /api/predict   multipart form field "file"; optional field "produce"
+                      (a catalogue id such as banana, or unknown)
+  GET  /api/produce   supported produce types for the selector
+  GET  /api/guidance  ?produce=&freshness= -> label, severity and guidance
+                      from the catalogue (the model is not run)
+  GET  /docs          interactive API docs
+
+Response of /api/predict includes: label, class index, probabilities for Fresh
+and Spoiled, model_version, and elapsed_ms (decode + validation + preprocessing
++ model forward). It also carries combined_label (for example "Fresh banana",
+or "Fresh produce" when identity is unknown), produce {id, label, source,
+model_version, probabilities}, freshness {...}, severity (always
+status "not_assessed") and guidance (reviewed, sourced, general advice).
+
+Produce identity and guidance (added 2026-10-16)
+  - Produce identity is SELECTED BY THE USER. FreshNet has no produce
+    classifier and does not recognise produce from the photo. There is no
+    unknown / non-produce detector.
+  - The freshness model, preprocessing, argmax rule and weights are unchanged.
+  - Spoilage severity is not assessed. The model only separates Fresh from
+    Spoiled.
+  - Guidance comes from a versioned catalogue built from FDA, USDA FSIS,
+    UC Davis Postharvest and UC Master Gardener pages. Storage advice is
+    reviewed for 11 produce types; bitter gourd is awaiting review.
+  - Details: docs/PRODUCE_IDENTIFICATION_AND_GUIDANCE.md,
+    docs/SEVERITY_PROPOSAL.md, docs/PRODUCE_LABEL_INVENTORY.md.
+
+Example (real run, validation image, not a benchmark score):
+  label Fresh, Fresh prob 0.99999988, Spoiled prob 7.6e-08,
+  elapsed 104 ms on CPU.
+
+Input policy (a bad upload is turned back with a reason, never silently
+altered):
+  - Formats: static JPEG or PNG only (checked by real image format, not by
+    filename or MIME type)
+  - Max 8 MB upload and 16,000,000 pixels (8,000 px on any edge)
+  - Rejected: animated images, any transparency (RGBA/LA/palette with alpha),
+    EXIF orientation other than normal, corrupt files, empty uploads
+  - Errors are JSON {code, message}; no file paths or stack traces are exposed
+
+If the model bundle is missing, health still reports the API as up but the model
+as unavailable, and predictions return 503. There is no mock model.
+
+
+------------------------------------------------------------------------------
+11. WEBSITE (FRONTEND)
+------------------------------------------------------------------------------
+Stack: React 19, Vite 8, Tailwind 4, TypeScript. Single page. Dev server on
+port 5173, proxying /api to the backend on port 8000.
+
+Sections (exact names): Home, Analyze, How It Works, Model Performance,
+About / Team.
+
+Design (latest redesign)
+  - Flat sand and moss-green palette, light geometric type (Stack Sans)
+  - Hero with a masked two-line headline and the working analyzer beside it
+  - Animated drawn fruits and vegetables (apple, tomato, lemon, carrot,
+    broccoli, banana) in Fresh and Spoiled states; the belt lets you press a
+    drawing to flip it. These are ILLUSTRATIONS, not model output.
+  - The analyzer draws the five detail patches over your photo
+  - A pinned "How it reads a photo" stage that changes as you scroll
+  - Model Performance with recorded numbers and animated bars
+  - Four real credited pictures from open collections (photographs and a 1901
+    seed-catalogue plate); credits are in the footer
+  - Respects prefers-reduced-motion and keyboard focus
+
+A "Produce type" selector appears once a photo is chosen ("Selected by you").
+Result card shows: "Predicted: Fresh banana" (or "Fresh produce" when unknown),
+who set the produce identity, the model's Fresh/Spoiled label and both
+probabilities, the statement that they are model outputs and not a freshness
+percentage, model version, elapsed time, "Spoilage severity: Not assessed",
+and below it compact guidance (Suggested next steps, Storage guidance, What to
+check yourself, a food-safety note and a sources list). Changing the photo
+clears the result; changing the produce type updates only the label and advice.
+
+
+------------------------------------------------------------------------------
+12. REPOSITORY LAYOUT
+------------------------------------------------------------------------------
+  backend/            FastAPI app (api, core, db, schemas, services)
+  frontend/           React/Vite site (src/components, src/data/benchmark.ts)
+  ml/                 data prep, models, training, evaluation, deployment export
+    ml/models/        ContextBranch, DetailBranch, FusedFreshNet, build_model
+    ml/training/      config, data, metrics, train, evaluate
+    ml/deployment/    export_bundle.py
+  configs/            dataset.yaml, default.yaml, train.yaml, train_v3.yaml
+  scripts/            start_local.sh and training launch helpers
+  tests/              backend, ml and dataset tests
+  docs/               PROJECT_SPEC.md, DATASET.md, TRAINING.md,
+                      IMPLEMENTATION_STATUS.md
+  artifacts/          checkpoints, metrics, runs, deployment bundle
+                      (only artifacts/deployment is in git)
+  data/               dataset and manifests (not in git)
+
+Key results on disk:
+  artifacts/metrics/v3/eval/selection.json
+  artifacts/metrics/v3/eval/fused/test/metrics.json  (+ predictions.csv,
+                      confusion matrix images, REPORT.md)
+
+
+------------------------------------------------------------------------------
+13. WHAT FRESHNET DOES NOT CLAIM (IMPORTANT LIMITS)
+------------------------------------------------------------------------------
+  - It is NOT a food-safety tool. A Fresh label does not mean safe to eat.
+  - It does NOT estimate shelf life, age, or a freshness percentage.
+  - The displayed probabilities are the model's class scores after softmax.
+    They are NOT calibrated confidence, and "100.0% Fresh" does not mean
+    certainty.
+  - It judges what is VISIBLE: colour, bruising, mould, texture. It cannot see
+    smell, taste, internal rot, or storage history.
+  - The benchmark may still contain near-duplicates (search was not
+    exhaustive) and was not verified leakage-free. Scores may be optimistic
+    compared with new real-world photos.
+  - 18,266 of 71,318 images were quarantined and excluded; scores apply to the
+    53,052-image benchmark only.
+  - Spoiled-predicted-as-Fresh errors (86 of 2,726 on test) are the riskiest
+    mistake type.
+  - Results from the older original split are held and must not be compared
+    with the v3 results.
+  - Only two classes exist. Anything "in between" is forced into Fresh or
+    Spoiled.
+  - Generalisation to produce types, cameras, or lighting not represented in
+    the dataset is untested.
+
+
+------------------------------------------------------------------------------
+14. HOW TO RUN IT LOCALLY (macOS)
+------------------------------------------------------------------------------
+Backend (from the project root):
+  PYTHONPATH="$PWD/backend:$PWD/ml" backend/.venv/bin/python -m uvicorn \
+      app.main:app --host 127.0.0.1 --port 8000
+
+Frontend:
+  cd frontend
+  npm install          # first time only
+  npm run dev -- --host 127.0.0.1 --port 5173
+
+Then open http://127.0.0.1:5173/
+
+Or start both with:  bash scripts/start_local.sh
+
+Useful settings (backend/.env, which is git-ignored; see .env.example):
+  FRESHNET_BUNDLE_DIR=artifacts/deployment/v3/fused_epoch29_b962c650ed80
+  FRESHNET_DEVICE=cpu
+
+Production build of the site:  cd frontend && npm run build
+Tests:  backend/.venv/bin/python -m pytest tests
+
+
+------------------------------------------------------------------------------
+15. VERSION CONTROL AND STATUS
+------------------------------------------------------------------------------
+  - GitHub repo: https://github.com/PranavSairam/FreshNet (private, because
+    student IDs appear on the site)
+  - Initial commit c26c217 on main is pushed.
+  - Uploaded: code, docs, configs, tests, and the deployment weights.pt
+    (about 19 MB).
+  - NOT uploaded: the dataset, training checkpoints, .env, virtualenv,
+    node_modules.
+  - The latest front-end redesign (animated produce, new layout, pictures,
+    credits) and the produce identity / guidance feature are in the working
+    tree and have NOT been committed or pushed yet.
+
+Status summary
+  Data pipeline ........... done
+  Training (v3) ........... done (context, detail, fused)
+  Model selection ......... done (fused, epoch 29, validation only)
+  Test evaluation ......... done once for the selected model
+  Deployment export ....... done and verified
+  API ..................... done
+  Website ................. done (redesigned)
+  Medium class ............ not built (future work only)
+
+
+------------------------------------------------------------------------------
+16. PICTURE CREDITS (WEBSITE)
+------------------------------------------------------------------------------
+  - Radish catalogue page, John Lewis Childs (Firm), Henry G. Gilbert Nursery
+    and Seed Trade Catalog Collection, 1901. No known copyright restrictions.
+  - Vegetable stall and Fruit stall, Acabashi, CC BY-SA 4.0, via Wikimedia
+    Commons.
+  - Roxbury Russet, Ed Yourdon, CC BY-SA 2.0, via Wikimedia Commons.
+  - The fruit and vegetable drawings were made for FreshNet.
+
+
+------------------------------------------------------------------------------
+17. ONE-SENTENCE SUMMARY FOR A REPORT OR VIVA
+------------------------------------------------------------------------------
+FreshNet is a two-branch deep-learning classifier (EfficientNet-B0 on the whole
+image plus a small CNN on five close-up patches, fused into a Fresh/Spoiled
+decision) that scored 98.33% accuracy and 0.981 macro F1 on a held-out test set
+of 8,035 images from a cleaned 53,052-image benchmark, selected using validation
+data only, and served through a FastAPI backend and React website as a visual
+estimate - not a food-safety check.
+==============================================================================

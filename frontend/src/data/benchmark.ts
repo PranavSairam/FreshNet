@@ -16,6 +16,8 @@ export const fusedTest = {
   balancedAccuracy: 0.979706,
   macroF1: 0.981337,
   spoiledRecall: 0.968452,
+  freshRecall: 0.990959,
+  spoiledPrecision: 0.982143,
   spoiledAsFresh: 86,
   spoiledImages: 2726,
   confusion: [

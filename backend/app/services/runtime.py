@@ -12,6 +12,7 @@ from app.core.errors import AppError
 from app.schemas.health import ModelStatus
 from app.services.image_policy import validate_image_bytes
 from app.services.inference import BundleError, LoadedBundle, classify_pil, load_bundle
+from app.services.produce import ProduceIdentity, describe_result, resolve_identity, unknown_identity
 
 logger = logging.getLogger("freshnet.runtime")
 
@@ -59,7 +60,13 @@ def current_model_status() -> ModelStatus:
     )
 
 
-def predict_bytes(data: bytes) -> dict[str, Any]:
+def predict_bytes(data: bytes, produce: ProduceIdentity | None = None) -> dict[str, Any]:
+    """Classify one image.
+
+    `produce` is the already validated, user-selected identity (or None). It never
+    influences the freshness model. The legacy top-level fields are kept unchanged;
+    `produce`, `freshness`, `severity`, `guidance` and `combined_label` are additive.
+    """
     started = time.perf_counter()
     image = validate_image_bytes(data)
     if _bundle is None:
@@ -78,6 +85,10 @@ def predict_bytes(data: bytes) -> dict[str, Any]:
     probabilities = result["probabilities"]
     if not all(_finite(value) for value in probabilities.values()):
         raise AppError("inference_failed", "The image could not be classified.", 500)
+    # Timing above covers the freshness path only. Identity and guidance are
+    # deterministic lookups done afterwards.
+    identity = resolve_identity(produce or unknown_identity(), image)
+    described = describe_result(result["label"], identity)
     return {
         "label": result["label"],
         "label_index": result["label_index"],
@@ -85,6 +96,17 @@ def predict_bytes(data: bytes) -> dict[str, Any]:
         "model_version": result["model_version"],
         "elapsed_ms": round(elapsed_ms, 3),
         "timing_scope": "decode_validation_preprocessing_and_forward",
+        "contract_version": "freshnet.predict.v2",
+        "combined_label": described["combined_label"],
+        "produce": described["produce"],
+        "freshness": {
+            "label": result["label"],
+            "class_index": result["label_index"],
+            "probabilities": probabilities,
+            "model_version": result["model_version"],
+        },
+        "severity": described["severity"],
+        "guidance": described["guidance"],
     }
 
 

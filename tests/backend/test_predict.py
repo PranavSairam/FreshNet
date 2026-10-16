@@ -14,17 +14,6 @@ BUNDLE = ROOT / "artifacts/deployment/v3/fused_epoch29_b962c650ed80"
 SAMPLE = ROOT / "data/Dataset/Fresh/FreshBanana/b_f856.png"
 
 
-@pytest.fixture
-def ready_client(tmp_path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
-    monkeypatch.setenv("FRESHNET_SQLITE_PATH", str(tmp_path / "freshnet.sqlite"))
-    monkeypatch.setenv("FRESHNET_BUNDLE_DIR", str(BUNDLE))
-    monkeypatch.setenv("FRESHNET_DEVICE", "cpu")
-    get_settings.cache_clear()
-    with TestClient(app) as test_client:
-        yield test_client
-    get_settings.cache_clear()
-
-
 def test_missing_bundle_predicts_unavailable(client: TestClient) -> None:
     response = client.post(
         "/api/predict",

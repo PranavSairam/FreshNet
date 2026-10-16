@@ -85,6 +85,8 @@ The Vite dev server proxies `/api` to `http://127.0.0.1:8000`.
 
 `POST /api/predict` accepts one multipart field named `file`. Static JPEG and PNG only, at most 8 MB and 16 million pixels. Animated images, images with an alpha channel, and images whose EXIF orientation is not upright are rejected. EXIF is not applied, and transparency is not composited. Health can report the API as up while `model.available` is false. A loaded model reports `model.status` of `ready` and the bundle version. `elapsed_ms` covers decode, validation, preprocessing, and the model forward.
 
+`POST /api/predict` also accepts an optional multipart field `produce` (a catalogue id such as `banana`, or `unknown`). FreshNet does not recognise produce from the photo: the identity is chosen by the user and shown as "Selected by you". The response keeps the fields below and adds `combined_label` (for example `Fresh banana`, or `Fresh produce` when unknown), `produce`, `freshness`, `severity` (always `not_assessed`) and `guidance` (reviewed, sourced, general advice). An unsupported `produce` value returns 400 `unsupported_produce`. `GET /api/produce` lists the supported types and `GET /api/guidance?produce=&freshness=` looks up guidance without running the model. See `docs/PRODUCE_IDENTIFICATION_AND_GUIDANCE.md` and `docs/SEVERITY_PROPOSAL.md`.
+
 Example from a real validation JPEG/PNG request against the loaded bundle:
 
 ```json

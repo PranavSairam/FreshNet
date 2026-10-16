@@ -15,6 +15,21 @@ from app.main import app
 from fastapi.testclient import TestClient
 
 
+BUNDLE = ROOT / "artifacts/deployment/v3/fused_epoch29_b962c650ed80"
+
+
+@pytest.fixture
+def ready_client(tmp_path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    """App with the verified v3 deployment bundle loaded."""
+    monkeypatch.setenv("FRESHNET_SQLITE_PATH", str(tmp_path / "freshnet.sqlite"))
+    monkeypatch.setenv("FRESHNET_BUNDLE_DIR", str(BUNDLE))
+    monkeypatch.setenv("FRESHNET_DEVICE", "cpu")
+    get_settings.cache_clear()
+    with TestClient(app) as test_client:
+        yield test_client
+    get_settings.cache_clear()
+
+
 @pytest.fixture
 def client(tmp_path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     db_file = tmp_path / "freshnet.sqlite"

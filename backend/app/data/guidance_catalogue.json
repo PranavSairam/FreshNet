@@ -1,0 +1,236 @@
+{
+  "catalogue_version": "2026-10-16.1",
+  "reviewed_on": "2026-10-16",
+  "review_note": "Each point was checked against the text of the cited public page or document on the review date. This is an engineering review of the wording, not a review by a food-safety professional. Guidance is general advice. It is not based on anything the model saw in the photo.",
+  "safety_note": "Visual classification does not certify food safety.",
+  "sources": {
+    "fda_selecting_serving": {
+      "title": "Selecting and Serving Produce Safely",
+      "publisher": "U.S. Food and Drug Administration",
+      "url": "https://www.fda.gov/food/buy-store-serve-safe-food/selecting-and-serving-produce-safely",
+      "scope": "General home handling of fresh produce: refrigerating perishable produce, washing under running water, cutting away damaged areas, throwing away rotten produce.",
+      "reviewed_on": "2026-10-16"
+    },
+    "usda_fsis_molds": {
+      "title": "Molds on Food: Are They Dangerous?",
+      "publisher": "USDA Food Safety and Inspection Service",
+      "url": "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/molds-food-are-they-dangerous",
+      "scope": "Handling food with visible mold, including soft fruits and vegetables such as cucumbers and tomatoes, and cleaning where moldy food was stored.",
+      "reviewed_on": "2026-10-16"
+    },
+    "ucd_postharvest_storing": {
+      "title": "Storing Fresh Fruits and Vegetables for Better Taste (UC ANR Publication 21590)",
+      "publisher": "UC Davis Postharvest Technology Center, University of California Agriculture and Natural Resources",
+      "url": "https://postharvest.ucdavis.edu/sites/g/files/dgvnsk12711/files/inline-files/230110.pdf",
+      "scope": "Where to store common fruits and vegetables at home (room temperature or refrigerator), countertop and refrigerator storage tips.",
+      "reviewed_on": "2026-10-16"
+    },
+    "uc_master_gardener_storing": {
+      "title": "Harvesting and Storing",
+      "publisher": "UC Master Gardener Program, University of California Agriculture and Natural Resources",
+      "url": "https://ucanr.edu/program/uc-master-gardener-program/harvesting-and-storing",
+      "scope": "Home storage groups for fresh vegetables, including okra, tomatoes and the effect of ripe fruit on vegetables stored with it.",
+      "reviewed_on": "2026-10-16"
+    }
+  },
+  "shared": {
+    "Fresh": {
+      "next_steps": [
+        {
+          "text": "Wash it under running water before eating or cutting. Washing can reduce bacteria but does not eliminate them.",
+          "sources": ["fda_selecting_serving"]
+        }
+      ],
+      "storage_fallback": [
+        {
+          "text": "Keep perishable produce such as strawberries, lettuce and herbs in a clean refrigerator at 40°F or below, and refrigerate anything pre-cut or packaged. If you are unsure whether an item should be refrigerated, ask your grocer.",
+          "sources": ["fda_selecting_serving"]
+        }
+      ],
+      "checks": [
+        {
+          "text": "Cut away any damaged or bruised areas before eating, and throw away any produce that looks rotten.",
+          "sources": ["fda_selecting_serving"]
+        },
+        {
+          "text": "Look for visible mold. If it is covered with mold, discard it.",
+          "sources": ["usda_fsis_molds"]
+        }
+      ]
+    },
+    "Spoiled": {
+      "next_steps": [
+        {
+          "text": "If it looks rotten, throw it away.",
+          "sources": ["fda_selecting_serving"]
+        },
+        {
+          "id": "mold_general",
+          "text": "If it is covered with mold, discard it, and do not sniff it, which can cause respiratory trouble.",
+          "sources": ["usda_fsis_molds"]
+        }
+      ],
+      "storage": [
+        {
+          "text": "Clean the spot where it was stored, and check nearby produce it touched. Mold spreads quickly in fruits and vegetables.",
+          "sources": ["usda_fsis_molds"]
+        }
+      ],
+      "checks": [
+        {
+          "text": "Look for visible mold or areas that look rotten. FreshNet does not detect mold or any other specific cause.",
+          "sources": ["usda_fsis_molds", "fda_selecting_serving"]
+        }
+      ]
+    }
+  },
+  "produce": {
+    "apple": {
+      "label": "Apple",
+      "noun": "apple",
+      "dataset_folders": ["apple"],
+      "storage_review": "reviewed",
+      "storage": [
+        {
+          "text": "Apples can sit at room temperature, away from direct sunlight, for under a week. Refrigerate them for longer.",
+          "sources": ["ucd_postharvest_storing"]
+        }
+      ]
+    },
+    "banana": {
+      "label": "Banana",
+      "noun": "banana",
+      "dataset_folders": ["banana"],
+      "storage_review": "reviewed",
+      "storage": [
+        {
+          "text": "Store bananas at room temperature, away from direct sunlight. In the refrigerator the skin turns black and they do not gain good sweetness.",
+          "sources": ["ucd_postharvest_storing"]
+        }
+      ]
+    },
+    "bitter_gourd": {
+      "label": "Bitter gourd",
+      "noun": "bitter gourd",
+      "dataset_folders": ["bitter_gourd"],
+      "storage_review": "awaiting_review",
+      "storage": []
+    },
+    "capsicum": {
+      "label": "Bell pepper / capsicum",
+      "noun": "bell pepper",
+      "dataset_folders": ["bell_pepper", "capsicum"],
+      "storage_review": "reviewed",
+      "storage": [
+        {
+          "text": "Store peppers at room temperature, away from direct sunlight. They can go in the refrigerator for 1 to 3 days if you use them soon after taking them out.",
+          "sources": ["ucd_postharvest_storing"]
+        }
+      ]
+    },
+    "carrot": {
+      "label": "Carrot",
+      "noun": "carrot",
+      "dataset_folders": ["carrot"],
+      "storage_review": "reviewed",
+      "storage": [
+        {
+          "text": "Store carrots in the refrigerator in a perforated plastic bag in the produce drawer, apart from ripe fruit, which can give carrots a bitter taste.",
+          "sources": ["ucd_postharvest_storing", "uc_master_gardener_storing"]
+        }
+      ]
+    },
+    "cucumber": {
+      "label": "Cucumber",
+      "noun": "cucumber",
+      "dataset_folders": ["cucumber"],
+      "storage_review": "reviewed",
+      "storage": [
+        {
+          "text": "Store cucumbers at room temperature, away from direct sunlight. They can go in the refrigerator for 1 to 3 days if you use them soon after taking them out.",
+          "sources": ["ucd_postharvest_storing"]
+        }
+      ],
+      "spoiled_mold_point": {
+        "text": "If it has mold, discard it. USDA says soft produce such as cucumbers can be contaminated below the surface. Do not sniff it.",
+        "sources": ["usda_fsis_molds"]
+      }
+    },
+    "mango": {
+      "label": "Mango",
+      "noun": "mango",
+      "dataset_folders": ["mango"],
+      "storage_review": "reviewed",
+      "storage": [
+        {
+          "text": "Store mangoes at room temperature, away from direct sunlight.",
+          "sources": ["ucd_postharvest_storing"]
+        }
+      ]
+    },
+    "okra": {
+      "label": "Okra",
+      "noun": "okra",
+      "dataset_folders": ["okra"],
+      "storage_review": "reviewed",
+      "storage": [
+        {
+          "text": "Okra keeps best in a cool place of 50 to 60°F. If you have none, refrigerate it for no longer than 5 days and use it soon after taking it out.",
+          "sources": ["uc_master_gardener_storing"]
+        }
+      ]
+    },
+    "orange": {
+      "label": "Orange",
+      "noun": "orange",
+      "dataset_folders": ["orange"],
+      "storage_review": "reviewed",
+      "storage": [
+        {
+          "text": "Store oranges at room temperature, away from direct sunlight.",
+          "sources": ["ucd_postharvest_storing"]
+        }
+      ]
+    },
+    "potato": {
+      "label": "Potato",
+      "noun": "potato",
+      "dataset_folders": ["potato"],
+      "storage_review": "reviewed",
+      "storage": [
+        {
+          "text": "Store potatoes in a well-ventilated spot in the pantry, and protect them from light to avoid greening.",
+          "sources": ["ucd_postharvest_storing"]
+        }
+      ]
+    },
+    "strawberry": {
+      "label": "Strawberry",
+      "noun": "strawberry",
+      "dataset_folders": ["strawberry"],
+      "storage_review": "reviewed",
+      "storage": [
+        {
+          "text": "Store strawberries in a clean refrigerator at 40°F or below.",
+          "sources": ["fda_selecting_serving", "ucd_postharvest_storing"]
+        }
+      ]
+    },
+    "tomato": {
+      "label": "Tomato",
+      "noun": "tomato",
+      "dataset_folders": ["tomato"],
+      "storage_review": "reviewed",
+      "storage": [
+        {
+          "text": "Store whole tomatoes at room temperature, away from direct sunlight. In the refrigerator even red tomatoes lose flavor, and pink ones do not turn red.",
+          "sources": ["ucd_postharvest_storing", "uc_master_gardener_storing"]
+        }
+      ],
+      "spoiled_mold_point": {
+        "text": "If it has mold, discard it. USDA says soft produce such as tomatoes can be contaminated below the surface. Do not sniff it.",
+        "sources": ["usda_fsis_molds"]
+      }
+    }
+  }
+}
