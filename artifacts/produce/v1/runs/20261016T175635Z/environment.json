@@ -1,0 +1,33 @@
+{
+  "python": "3.12.15",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "torch": "2.14.0",
+  "torchvision": "0.29.0",
+  "device": "mps",
+  "dtype": "float32 (autocast only on CUDA; none on MPS/CPU)",
+  "initialization": "imagenet_efficientnet_b0_DEFAULT",
+  "smoke_test": false,
+  "seed": 42,
+  "batch_size": 32,
+  "num_workers": 6,
+  "manifest_fingerprint": "9e3a27855e6e01d97a32fee61273dde59b1df7e3166ef25e764e03b97c872c66",
+  "num_classes": 12,
+  "train_images": 37162,
+  "val_images": 7853,
+  "class_weights": {
+    "apple": 0.8236,
+    "banana": 0.919,
+    "bitter_gourd": 2.5696,
+    "capsicum": 1.2155,
+    "carrot": 0.6526,
+    "cucumber": 1.8643,
+    "mango": 2.0597,
+    "okra": 2.8661,
+    "orange": 0.6552,
+    "potato": 1.5959,
+    "strawberry": 2.244,
+    "tomato": 0.6202
+  },
+  "pid": 79192,
+  "run_dir": "/Users/sairampranav/FreshNet/artifacts/produce/v1/runs/20261016T175635Z"
+}

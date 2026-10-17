@@ -48,6 +48,8 @@ export function AnalyzePanel({ modelReady, modelMessage, checking = false }: Pro
   const [described, setDescribed] = useState<Described | null>(null);
   const [guidanceBusy, setGuidanceBusy] = useState(false);
   const [guidanceError, setGuidanceError] = useState<string | null>(null);
+  const [automatic, setAutomatic] = useState(false);
+  const [supportedIds, setSupportedIds] = useState<string[]>([]);
 
   useEffect(() => {
     return () => {
@@ -61,9 +63,14 @@ export function AnalyzePanel({ modelReady, modelMessage, checking = false }: Pro
     let live = true;
     fetchProduceCatalogue()
       .then((catalogue) => {
-        if (live && catalogue.options.length > 0) {
+        if (!live) {
+          return;
+        }
+        if (catalogue.options.length > 0) {
           setOptions(catalogue.options);
         }
+        setAutomatic(catalogue.identification.available);
+        setSupportedIds(catalogue.identification.supported_ids ?? []);
       })
       .catch(() => {
         // Without the list only "Unknown / other" is offered. Freshness still works.
@@ -121,13 +128,20 @@ export function AnalyzePanel({ modelReady, modelMessage, checking = false }: Pro
     setGuidanceError(null);
     setResult(null);
     setDescribed(null);
+    if (automatic) {
+      setProduceId(UNKNOWN_OPTION.id);
+    }
     try {
-      const prediction = await predictImage(file, produceId);
+      // With automatic identification the type is never sent up front: the produce
+      // model reads the photo, and the user corrects afterwards if needed.
+      const prediction = await predictImage(file, automatic ? "unknown" : produceId);
       if (id !== requestId.current) {
         return;
       }
       setResult(prediction);
       setDescribed(prediction);
+      // The control starts from what the produce model said. Low confidence stays Unknown.
+      setProduceId(prediction.produce.id);
     } catch (error) {
       if (id !== requestId.current) {
         return;
@@ -261,10 +275,27 @@ export function AnalyzePanel({ modelReady, modelMessage, checking = false }: Pro
         )}
       </div>
 
-      {preview && (
+      {preview && automatic && !result && (
+        <div className="mt-4 text-[length:var(--step-small)] text-[var(--muted)]" data-testid="auto-note">
+          <p>
+            FreshNet will also try to recognise the produce type from the photo, using a separate model
+            from the freshness one. Upload one clearly visible fruit or vegetable.
+          </p>
+          <details className="mt-1">
+            <summary className="cursor-pointer font-medium text-[var(--ink)]">Supported produce types</summary>
+            <p className="mt-1">
+              {supportedLabels(options, supportedIds)}. The produce model has no &ldquo;not produce&rdquo;
+              option, so something else in the photo can still get a confident wrong guess. You can
+              correct the type after the result.
+            </p>
+          </details>
+        </div>
+      )}
+
+      {preview && (!automatic || result) && (
         <div className="mt-4">
           <label htmlFor="produce-type" className="block text-[length:var(--step-small)] font-medium">
-            Produce type
+            {automatic ? "Correct produce type" : "Produce type"}
           </label>
           <select
             id="produce-type"
@@ -282,8 +313,9 @@ export function AnalyzePanel({ modelReady, modelMessage, checking = false }: Pro
             ))}
           </select>
           <p id="produce-type-hint" className="mt-1 text-[length:var(--step-small)] text-[var(--muted)]">
-            Selected by you. FreshNet does not recognise produce from the photo, so this only sets the
-            label and the advice.
+            {automatic
+              ? "Changing this only updates the label and the advice. The photo is not analysed again and the freshness result stays the same."
+              : "Selected by you. Automatic produce recognition is not available right now, so this only sets the label and the advice."}
           </p>
         </div>
       )}
@@ -353,9 +385,13 @@ export function AnalyzePanel({ modelReady, modelMessage, checking = false }: Pro
             <h3 className="display text-4xl" data-testid="combined-label">
               Predicted: {described.combined_label}
             </h3>
-            <p className="mt-2 text-[length:var(--step-small)] opacity-90" data-testid="identity-note">
-              {identityNote(described)}
-            </p>
+            <IdentityNote
+              described={described}
+              result={result}
+              options={options}
+              disabled={selectorLocked}
+              onUse={(id) => void changeProduce(id)}
+            />
 
             <p className="mt-5 text-[length:var(--step-small)] opacity-80">
               Freshness from the model: <strong className="font-semibold">{result.label}</strong>
@@ -387,15 +423,104 @@ export function AnalyzePanel({ modelReady, modelMessage, checking = false }: Pro
   );
 }
 
-function identityNote(described: Described): string {
+function labelFor(options: ProduceOption[], id: string): string {
+  return options.find((option) => option.id === id)?.label ?? id;
+}
+
+function supportedLabels(options: ProduceOption[], ids: string[]): string {
+  const labels = ids.map((id) => labelFor(options, id));
+  return labels.length > 0 ? labels.join(", ") : "the trained produce types";
+}
+
+function topMatches(probabilities: Record<string, number> | null, options: ProduceOption[]): string {
+  if (!probabilities) {
+    return "";
+  }
+  return Object.entries(probabilities)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([id, value]) => `${labelFor(options, id)} ${(value * 100).toFixed(1)}%`)
+    .join(" · ");
+}
+
+/**
+ * Says where the produce type came from. The produce model is separate from the
+ * freshness model, so its numbers are labelled as its own and are never combined
+ * with the freshness probabilities.
+ */
+function IdentityNote({
+  described,
+  result,
+  options,
+  disabled,
+  onUse,
+}: {
+  described: Described;
+  result: Prediction;
+  options: ProduceOption[];
+  disabled: boolean;
+  onUse: (id: string) => void;
+}) {
   const { produce } = described;
+  const original = result.identification;
+  const matches = topMatches(original.probabilities, options);
+  const modelSaid =
+    original.status === "model_predicted"
+      ? result.produce.label
+      : original.status === "needs_confirmation" && original.suggestion
+        ? original.suggestion.label
+        : null;
+
+  let line: string;
   if (produce.source === "user_selected") {
-    return `Produce type: ${produce.label}. Selected by you, not recognised from the image.`;
+    line =
+      modelSaid && original.status !== "user_selected"
+        ? produce.id === result.produce.id || produce.id === original.suggestion?.id
+          ? `Produce type: ${produce.label}. Confirmed by you.`
+          : `Produce type: ${produce.label}. Corrected by you; the produce model had said ${modelSaid}.`
+        : `Produce type: ${produce.label}. Selected by you, not recognised from the image.`;
+  } else if (produce.source === "model_predicted") {
+    line = `Produce type: ${produce.label}. Predicted by the produce model, which is separate from the freshness model.`;
+  } else if (original.status === "needs_confirmation") {
+    line = "Please confirm produce type.";
+  } else if (original.status === "failed") {
+    line = "Produce type: not identified. Automatic identification failed for this photo; use the produce type selector. The freshness result is not affected.";
+  } else if (original.status === "unavailable") {
+    line = "Produce type: not identified. Automatic identification is not available; use the produce type selector for produce-specific advice.";
+  } else {
+    line = "Produce type: not identified. Use the produce type selector for produce-specific advice.";
   }
-  if (produce.source === "model_predicted") {
-    return `Produce type: ${produce.label}. Predicted by produce model ${produce.model_version ?? "unknown"}.`;
-  }
-  return "Produce type: not identified. Choose one above for produce-specific advice.";
+
+  const showSuggestion =
+    produce.source !== "user_selected" && original.status === "needs_confirmation" && original.suggestion;
+  const showMatches = matches !== "" && (original.status === "model_predicted" || original.status === "needs_confirmation");
+
+  return (
+    <div className="mt-2 text-[length:var(--step-small)]" data-testid="identity-note">
+      <p className="opacity-90">{line}</p>
+      {showSuggestion && original.suggestion && (
+        <p className="mt-1 opacity-90">
+          The produce model&rsquo;s best guess is {original.suggestion.label}
+          {original.suggestion.confidence !== null ? ` (${(original.suggestion.confidence * 100).toFixed(0)}%)` : ""},
+          but that is not confident enough to use without your check.{" "}
+          <button
+            type="button"
+            className="link cursor-pointer bg-transparent font-semibold text-white disabled:opacity-60"
+            style={{ textDecoration: "underline", textUnderlineOffset: 3 }}
+            disabled={disabled}
+            onClick={() => onUse(original.suggestion!.id)}
+          >
+            Use {original.suggestion.label}
+          </button>
+        </p>
+      )}
+      {showMatches && (
+        <p className="mt-1 opacity-75" data-testid="produce-matches">
+          Produce model top matches (its own scores, not the freshness result): {matches}
+        </p>
+      )}
+    </div>
+  );
 }
 
 function GuidanceBlock({ guidance, unidentified }: { guidance: Described["guidance"]; unidentified: boolean }) {
@@ -423,7 +548,7 @@ function GuidanceBlock({ guidance, unidentified }: { guidance: Described["guidan
       )}
       {unidentified && guidance.review_status === "generic" && (
         <p className="mt-3 text-[length:var(--step-small)] text-[var(--muted)]">
-          This is general advice. Pick a produce type above for advice specific to it.
+          This is general advice. Use the produce type selector for advice specific to it.
         </p>
       )}
       <p className="mt-3 text-[length:var(--step-small)] font-medium">{guidance.safety_note}</p>

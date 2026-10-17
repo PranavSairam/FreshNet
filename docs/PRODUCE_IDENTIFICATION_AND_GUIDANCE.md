@@ -1,19 +1,19 @@
 # Produce identity, combined labels and guidance
 
-Status as of 2026-10-16. This describes what exists today and what would be needed to go further.
+Status as of 2026-10-16. Produce type is now recognised by a separate, trained classifier (`PRODUCE_MODEL.md`); this page covers how identity, combined labels and guidance fit together.
 
 ## What works now
 
 - **Freshness** is unchanged: the verified v3 fused model (`freshnet-v3-fused-epoch29-b962c650ed80`), same preprocessing, argmax rule and weights. Nothing was retrained or rescored.
-- **Produce identity is chosen by the user.** No produce classifier exists in this repository, so the website offers a "Produce type" selector (12 types plus "Unknown / other"). The identity is labelled "Selected by you" and is never presented as recognition. The filename is never used.
+- **Produce identity comes from a separate model, with the user in control.** A 12-class produce classifier (own bundle, preprocessing and version) runs next to the freshness model on every upload. The website shows who set the identity: the produce model, or "Selected by you" after a correction. A user's choice always wins. If the produce bundle is missing, fails, or is not confident, identity is Unknown and the website offers manual selection; freshness is unaffected. The filename is never used.
 - **Combined label**: "Predicted: Fresh banana", "Predicted: Spoiled apple". Unknown identity gives "Predicted: Fresh produce" or "Predicted: Spoiled produce". Every word of the combined label after "Predicted:" is composed on the server from the freshness class and the catalogue noun.
 - **Severity is always "Not assessed".** The response carries `severity: {status: "not_assessed", label: null, explanation}`. No probability is converted into a percent, a grade, a shelf life or a safety score.
 - **Guidance** comes from a versioned catalogue (`backend/app/data/guidance_catalogue.json`), keyed by produce type and predicted freshness class. It is deterministic, reviewed text. No generative service is called, and text typed by a user is never put into advice.
 
 ## Not claimed
 
-- Automatic produce recognition does not exist.
-- There is no unknown / non-produce detector. The dataset has no out-of-scope images, so one could not be trained or evaluated.
+- The produce model recognises only its 12 trained types and has no "not produce" class. It is not an unknown / non-produce detector: the dataset has no out-of-scope images, so one could not be trained or evaluated, and unsupported or multi-item photos can still get confident guesses.
+- Its accuracy (test 0.9873, macro F1 0.9781 on the existing holdout, a separate-task evaluation) is its own number, not the freshness model's 98.33 %.
 - Spoilage severity is not estimated (see `SEVERITY_PROPOSAL.md`).
 
 ## API (additive)
@@ -24,14 +24,15 @@ Status as of 2026-10-16. This describes what exists today and what would be need
 | --- | --- |
 | `contract_version` | `freshnet.predict.v2` |
 | `combined_label` | e.g. `Fresh banana`, `Spoiled produce` |
-| `produce` | `{id, label, source: user_selected / model_predicted / unknown, model_version, probabilities}`. The last two are `null` unless a separate model produced the identity |
+| `produce` | `{id, label, source: user_selected / model_predicted / unknown, model_version, probabilities}`. The last two are `null` unless the produce model produced the identity. Probabilities here are the produce model's own scores over the 12 types and are never combined with the freshness probabilities |
+| `identification` | How the type was obtained: `status` (`user_selected`, `model_predicted`, `needs_confirmation`, `unavailable`, `failed`, `no_prediction`), `confirmation_required`, `suggestion` (`{id, label, confidence}` when confirmation is needed), `model_version`, `probabilities`, `confidence`, `confirmation_threshold`. When confirmation is needed, `produce` stays Unknown and the best guess is only a suggestion |
 | `freshness` | `{label, class_index, probabilities, model_version}`, the same numbers as the legacy fields |
 | `severity` | `{status: "not_assessed", label: null, explanation}` |
 | `guidance` | `{catalogue_version, general_advice, storage, checks, review_status, safety_note, disclaimer, sources}` |
 
-Other endpoints: `GET /api/produce` (selector options, `identification.mode = user_selected`, `available = false`) and `GET /api/guidance?produce=&freshness=` (catalogue lookup only, used when the user changes the produce type after a result; the image is not re-sent and the model is not run).
+Other endpoints: `GET /api/produce` (selector options; `identification.mode` is `automatic_with_correction` when the produce bundle is loaded, otherwise `user_selected`; also `available`, `model_version`, `confirmation_threshold`, `supported_ids`), `GET /api/health` (adds a separate `produce_model` status) and `GET /api/guidance?produce=&freshness=` (catalogue lookup only, used when the user changes the produce type after a result; the image is not re-sent and the model is not run).
 
-Order of checks on `/api/predict`: produce id, then image policy, then 503 if the model is missing. Identity and guidance are added after the timed freshness path, so `elapsed_ms` still measures decode, validation, preprocessing and the forward pass.
+Order of checks on `/api/predict`: produce id, then image policy, then 503 if the freshness model is missing. The produce model runs after the timed freshness path, so `elapsed_ms` still measures only the freshness decode, validation, preprocessing and forward pass. If a user selected a type, the produce model is not run.
 
 ## Guidance catalogue
 
@@ -61,13 +62,20 @@ To change guidance: edit the JSON, bump `catalogue_version`, re-read the cited p
 
 See `PRODUCE_LABEL_INVENTORY.md` (and the JSON beside it). In short: produce type exists only as the image folder name (`FreshBanana`, `RottenBanana`, ...). There are no specimen ids. Counts range from 529 (okra) to 11,431 (tomato). One source group mixes a bell pepper and a carrot image. Carrot, orange and tomato are mostly Fresh, while apple, potato and strawberry lean Spoiled.
 
-## What an automatic produce classifier would need
+## How the automatic classifier was built (and what remains open)
 
-1. **Decide the label set.** The audit finds 13 produce ids, because `Bellpepper` and `Capsicum` are separate folders. The selector offers 12 types because it joins them as "Bell pepper / capsicum" (a bell pepper is a capsicum). A classifier would need the same rule, and the merge should be checked against the images first. `Bittergroud` is also assumed to mean bitter gourd.
-2. **Fix label problems first.** Resolve the cross-produce group (RottenBellpepper / RottenCarrot, train) and recheck the spelling variants.
-3. **Keep the existing source-group split boundaries** from `manifests_v3_source`. Train on train, select on validation. The test split is for one final evaluation and must not be used for development, thresholds or model choice.
-4. **Guard against shortcuts.** Produce folders differ in background, camera and file style, and some are mostly one freshness class, so the classifier can learn those cues. Report per-class metrics for Fresh and Spoiled separately, and prefer macro averages because classes are very uneven.
-5. **Evaluate on its own.** Per-class precision and recall, a confusion matrix, macro F1, and a separate model version and bundle. Its accuracy is its own number and must not borrow the 98.33 % freshness figure.
-6. **Unknown handling.** The dataset has no out-of-scope images. Either collect and label some, or ship the classifier only with an abstain rule tuned on validation and described as "low confidence", not as an unknown detector.
-7. **Serve it as a separate component.** Implement the `ProduceIdentifier` interface in `backend/app/services/produce.py` and register it with `set_identifier`. The result then reports `source: model_predicted`, its own `model_version` and `probabilities`. A user's selection still wins. If the identifier fails, returns nothing or returns an id outside the catalogue, identity becomes unknown and freshness is unaffected. This path is covered by tests with stand-in identifiers only.
-8. **Guidance for bitter gourd** still needs a source before it is marked reviewed.
+Done, in `PRODUCE_MODEL.md` and `PRODUCE_DATASET_V1.md`:
+
+1. **Label set decided and audited.** Bellpepper, Capciscum and Capsicum are merged as capsicum (bell pepper); Okara joins okra; Bittergroud is read as bitter gourd. Each merge was checked against sample images. 12 classes.
+2. **Label problems fixed first.** The one cross-produce source group (RottenBellpepper / RottenCarrot, train) was excluded (2 images).
+3. **v3 source-group split boundaries kept.** Trained on train, selected on validation. The test split was evaluated once after the checkpoint was frozen.
+4. **Shortcut risk reported, not hidden.** Fresh and Spoiled subgroup results are reported separately (Fresh 0.9930, Spoiled 0.9762), alongside per-class metrics and macro averages.
+5. **Evaluated on its own.** Per-class precision, recall and F1, a confusion matrix, macro F1, balanced accuracy, and a separate bundle and model version.
+6. **Unknown handling.** No non-produce data exists, so the model ships with a confirmation rule (max-softmax threshold chosen on validation only), described as "please confirm", not as an unknown detector.
+7. **Served as a separate component** through the `ProduceIdentifier` interface (`backend/app/services/produce_model.py`). A user's selection still wins, and failure or a missing bundle leaves identity unknown with freshness unaffected.
+
+Still open:
+
+- Guidance for bitter gourd still needs a source before it is marked reviewed.
+- A genuine unknown / non-produce detector would need labelled out-of-scope images.
+- An independent external test set (photos from outside this dataset) has not been collected; current numbers come from the existing holdout.

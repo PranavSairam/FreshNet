@@ -13,7 +13,8 @@ from app.core.config import get_settings
 from app.core.errors import register_exception_handlers
 from app.core.logging import configure_logging
 from app.db.sqlite import initialize_database
-from app.services.produce import load_catalogue
+from app.services.produce import load_catalogue, set_identifier
+from app.services.produce_model import load_produce_identifier
 from app.services.runtime import load_model
 
 logger = logging.getLogger("freshnet")
@@ -26,6 +27,7 @@ async def lifespan(_app: FastAPI):
     initialize_database(settings.sqlite_file)
     load_catalogue()  # fail fast if the guidance catalogue is malformed
     load_model(settings)
+    set_identifier(load_produce_identifier(settings))  # None -> manual selection only
     logger.info("FreshNet API started", extra={"environment": settings.environment})
     yield
 

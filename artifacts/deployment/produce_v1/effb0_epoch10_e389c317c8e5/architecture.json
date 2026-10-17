@@ -1,0 +1,10 @@
+{
+  "architecture": "efficientnet_b0",
+  "family": "torchvision.models.efficientnet_b0 with a new classifier head",
+  "classifier": "Sequential(Dropout(0.3), Linear(1280, 12))",
+  "num_classes": 12,
+  "dropout": 0.3,
+  "initialization_for_training": "ImageNet (torchvision EfficientNet_B0_Weights.DEFAULT)",
+  "reconstruct_with_pretrained_download": false,
+  "decision_rule": "argmax over softmax of the 12 logits; softmax is display-only"
+}

@@ -1,0 +1,76 @@
+# Separate produce-type (identity) classifier. Not the freshness model.
+# Nothing here points at artifacts/checkpoints, artifacts/deployment/v3 or any freshness manifest.
+
+experiment:
+  name: freshnet_produce_v1
+  expected_produce_fingerprint: "9e3a27855e6e01d97a32fee61273dde59b1df7e3166ef25e764e03b97c872c66"
+  expected_source_split_fingerprint: "4f2534505b3ca656e72b786046d0d7f7da1088a221fe857a3b16639bd87c8f57"
+
+data:
+  manifests_dir: data/processed/manifests_produce_v1
+  train_csv: data/processed/manifests_produce_v1/train.csv
+  val_csv: data/processed/manifests_produce_v1/val.csv
+  # The test split is read only by ml/produce/evaluate.py after selection is frozen.
+  test_csv: data/processed/manifests_produce_v1/test.csv
+  class_mapping_json: data/processed/manifests_produce_v1/class_mapping.json
+  fingerprint_json: data/processed/manifests_produce_v1/produce_fingerprint.json
+
+preprocessing:
+  # Deterministic evaluation / deployment path: Resize((224, 224)) bilinear, antialias,
+  # no crop, ToTensor, ImageNet normalisation. The image is squared like the freshness
+  # input; this is a different model with its own preprocessing record.
+  input_size: 224
+  imagenet_mean: [0.485, 0.456, 0.406]
+  imagenet_std: [0.229, 0.224, 0.225]
+  eval_deterministic: true
+  train_augmentation:
+    # Training only. Colour jitter is kept mild because colour carries identity.
+    random_resized_crop: {scale: [0.6, 1.0], ratio: [0.75, 1.3333]}
+    horizontal_flip_p: 0.5
+    rotation_degrees: 12
+    color_jitter: {brightness: 0.15, contrast: 0.15, saturation: 0.1, hue: 0.02}
+
+model:
+  backbone: efficientnet_b0
+  pretrained: imagenet   # torchvision EfficientNet_B0_Weights.DEFAULT. Never the FreshNet checkpoint.
+  dropout: 0.3
+
+training:
+  seed: 42
+  device: auto            # mps > cpu. float32 on MPS and CPU (no autocast); AMP only on CUDA.
+  batch_size: 32
+  num_workers: 6
+  epochs: 20
+  early_stopping_patience: 5          # counted only after the backbone is unfrozen
+  early_stopping_metric: val_macro_f1
+  optimizer: adamw
+  weight_decay: 0.01
+  head_learning_rate: 0.0005
+  backbone_learning_rate: 0.0001
+  freeze_backbone_epochs: 2           # epochs 1-2: head only, backbone frozen and in eval mode
+  warmup_epochs: 1                    # epoch 3 runs at 0.2 x the base rates
+  final_lr_fraction: 0.02             # cosine from epoch 4 down to this fraction at the last epoch
+  class_weights: sqrt_inverse_frequency   # (N / (K * n_c)) ** 0.5 from TRAINING labels only
+  checkpoint_dir: artifacts/produce/v1/checkpoints
+  history_dir: artifacts/produce/v1/metrics
+  run_dir: artifacts/produce/v1/runs
+  smoke_dir: artifacts/produce/smoke
+  smoke:
+    max_train_samples: 96
+    max_val_samples: 48
+    epochs: 2
+    batch_size: 8
+    freeze_backbone_epochs: 1
+
+confirmation:
+  # Optional "please confirm produce type" state. Chosen on VALIDATION only, by this rule:
+  # the smallest threshold in the grid whose selective accuracy on accepted validation
+  # images is at least target_selective_accuracy. If none qualifies, the largest grid value.
+  # This is a confirmation/abstention rule, not an out-of-distribution detector.
+  method: max_softmax_threshold
+  grid: [0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98]
+  target_selective_accuracy: 0.99
+
+evaluation:
+  output_dir: artifacts/produce/v1/metrics/eval
+  export_dir: artifacts/deployment/produce_v1

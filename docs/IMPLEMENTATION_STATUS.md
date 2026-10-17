@@ -108,7 +108,7 @@ One test pass of that checkpoint, argmax only, on all 8,035 v3 test images: accu
 
 Added on top of the unchanged freshness model. Details: `docs/PRODUCE_IDENTIFICATION_AND_GUIDANCE.md`.
 
-- Produce identity is **selected by the user**. No produce classifier exists. There is no unknown / non-produce detector.
+- Produce identity is now recognised by a separate model (see the next section); a user's selection always wins and manual selection is the fallback. There is still no unknown / non-produce detector.
 - Results read "Predicted: Fresh banana" or "Predicted: Spoiled apple", and "Predicted: Fresh produce" when identity is unknown.
 - Spoilage severity is always "Not assessed". A proposal for genuine severity prediction is in `docs/SEVERITY_PROPOSAL.md`. Nothing from it is implemented.
 - Guidance comes from `backend/app/data/guidance_catalogue.json` (version 2026-10-16.1). Reviewed storage guidance covers 11 produce types. Bitter gourd is awaiting review. Unknown / other gets general advice.
@@ -116,7 +116,24 @@ Added on top of the unchanged freshness model. Details: `docs/PRODUCE_IDENTIFICA
 - Produce label audit: `docs/PRODUCE_LABEL_INVENTORY.md`, produced by `ml/audit_produce_labels.py` (metadata only).
 - Tests: `tests/backend/test_produce_guidance.py`. No retraining, rescoring or threshold change took place, and the original-split hold file is untouched.
 
+## Separate produce-type classifier (2026-10-16, trained)
+
+Details and all numbers: `docs/PRODUCE_MODEL.md`, `docs/PRODUCE_DATASET_V1.md`, `artifacts/produce/v1/metrics/eval/EVALUATION.md`.
+
+- 12 classes (Bellpepper/Capciscum/Capsicum merged into capsicum, Okara into okra, Bittergroud into bitter gourd). Manifests `data/processed/manifests_produce_v1/`, fingerprint `9e3a27855e6e01d97a32fee61273dde59b1df7e3166ef25e764e03b97c872c66`. 37,162 train, 7,853 validation, 8,035 test images; 2 train images excluded (one multi-produce source group). v3 split assignments and source-group boundaries unchanged.
+- EfficientNet-B0, ImageNet-initialised, trained on Apple MPS for 15 epochs (early stopping, best epoch 10). Measured about 160 s per epoch with the backbone frozen and about 460 s per epoch afterwards; 1.75 h in total. Checkpoint SHA-256 `e389c317c8e5df8f8434dd9025737afe4fb48b39e17d4ee63e87df78cfc759fa`, recorded before the test split was opened.
+- Validation accuracy 0.9929, macro F1 0.9877. Test (evaluated once; existing holdout, a separate-task evaluation, not a new independent test): accuracy 0.9873, macro F1 0.9781, balanced accuracy 0.9856. Spoiled-image produce accuracy 0.9762 vs Fresh 0.9930. These are not freshness results.
+- Bundle `artifacts/deployment/produce_v1/effb0_epoch10_e389c317c8e5` (`freshnet-produce-v1-effb0-e389c317c8e5`), checksummed, parity checked on 48 validation images (max logit difference 0.0, 48/48 predictions agree).
+- Integrated through the existing `ProduceIdentifier` interface: `backend/app/services/produce_model.py`, setting `FRESHNET_PRODUCE_BUNDLE_DIR`, separate `produce_model` entry in `/api/health`, new `identification` object in `/api/predict`. Both models run on each upload with their own preprocessing; their outputs are never combined. Failure or a missing bundle falls back to manual selection and does not affect freshness.
+- Confirmation rule ("Please confirm produce type"): max-softmax threshold 0.5 chosen on validation only; it rarely fires (4 of 7,853 validation images). Not an out-of-distribution detector.
+- Website: automatic identification note and a post-result "Correct produce type" control (updates label and guidance only, no re-analysis). Pre-analysis selector appears only when automatic identification is unavailable.
+- Tests: `tests/backend/test_produce_model.py` (tmp random-weight bundles for plumbing and failure cases, plus the real bundle on validation images). Full suite: 83 passed.
+- Freshness model, bundle (checksums verified after this work), preprocessing, evaluation records and the original-split hold file were not modified.
+- Limits: 12 supported types only; no non-produce class; confident wrong guesses are possible on unsupported or multi-item photos (the 1901 radish drawing was labelled carrot at 0.999 in a spot check).
+
 ## Scripts / Colab
+
+- `scripts/start_detached_produce.py` starts or resumes produce training in a new session (pidfile `artifacts/produce/v1/orchestrator/train.pid`, plus the trainer's own file lock)
 
 - `scripts/continue_training.sh` resumes `last.pt` per architecture, skips `complete.json`, and stops on failure
 - `scripts/start_detached_training.py` starts that script in a new session (parent pid 1) and refuses a second start while `artifacts/runs/orchestrator/train.pid` is alive

@@ -1,0 +1,392 @@
+{
+  "evaluated_at": "2026-10-16T20:25:46.657773+00:00",
+  "task": "produce-type classification (12 classes), NOT freshness",
+  "split": "produce test subset of the existing v3 holdout; a separate-task evaluation, not a new independent external test",
+  "checkpoint_sha256": "e389c317c8e5df8f8434dd9025737afe4fb48b39e17d4ee63e87df78cfc759fa",
+  "manifest_fingerprint": "9e3a27855e6e01d97a32fee61273dde59b1df7e3166ef25e764e03b97c872c66",
+  "test_metrics": {
+    "n": 8035,
+    "accuracy": 0.987306,
+    "macro_f1": 0.978079,
+    "balanced_accuracy": 0.985647,
+    "per_class": {
+      "apple": {
+        "precision": 0.994919,
+        "recall": 0.979,
+        "f1": 0.986895,
+        "support": 1000
+      },
+      "banana": {
+        "precision": 1.0,
+        "recall": 0.998592,
+        "f1": 0.999295,
+        "support": 710
+      },
+      "bitter_gourd": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 119
+      },
+      "capsicum": {
+        "precision": 0.931818,
+        "recall": 0.992736,
+        "f1": 0.961313,
+        "support": 413
+      },
+      "carrot": {
+        "precision": 0.996394,
+        "recall": 0.995198,
+        "f1": 0.995796,
+        "support": 1666
+      },
+      "cucumber": {
+        "precision": 0.960976,
+        "recall": 0.947115,
+        "f1": 0.953995,
+        "support": 208
+      },
+      "mango": {
+        "precision": 0.942675,
+        "recall": 0.973684,
+        "f1": 0.957929,
+        "support": 152
+      },
+      "okra": {
+        "precision": 0.91358,
+        "recall": 1.0,
+        "f1": 0.954839,
+        "support": 74
+      },
+      "orange": {
+        "precision": 0.99419,
+        "recall": 0.984026,
+        "f1": 0.989082,
+        "support": 1565
+      },
+      "potato": {
+        "precision": 0.930693,
+        "recall": 0.969072,
+        "f1": 0.949495,
+        "support": 291
+      },
+      "strawberry": {
+        "precision": 0.99187,
+        "recall": 1.0,
+        "f1": 0.995918,
+        "support": 122
+      },
+      "tomato": {
+        "precision": 0.996473,
+        "recall": 0.988338,
+        "f1": 0.992389,
+        "support": 1715
+      }
+    },
+    "class_order": [
+      "apple",
+      "banana",
+      "bitter_gourd",
+      "capsicum",
+      "carrot",
+      "cucumber",
+      "mango",
+      "okra",
+      "orange",
+      "potato",
+      "strawberry",
+      "tomato"
+    ],
+    "confusion_matrix": [
+      [
+        979,
+        0,
+        0,
+        6,
+        0,
+        2,
+        3,
+        0,
+        1,
+        8,
+        0,
+        1
+      ],
+      [
+        0,
+        709,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        119,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        410,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        2,
+        1658,
+        3,
+        0,
+        0,
+        2,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        2,
+        197,
+        0,
+        7,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        148,
+        0,
+        2,
+        2,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        74,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        4,
+        2,
+        0,
+        5,
+        0,
+        1540,
+        8,
+        0,
+        3
+      ],
+      [
+        0,
+        0,
+        0,
+        4,
+        1,
+        2,
+        0,
+        0,
+        0,
+        282,
+        1,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        122,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        14,
+        0,
+        1,
+        0,
+        0,
+        4,
+        0,
+        0,
+        1695
+      ]
+    ]
+  },
+  "fresh_spoiled_subgroups": {
+    "Fresh": {
+      "n": 5309,
+      "accuracy": 0.993031,
+      "per_class_accuracy": {
+        "apple": {
+          "n": 466,
+          "accuracy": 0.991416
+        },
+        "banana": {
+          "n": 300,
+          "accuracy": 1.0
+        },
+        "bitter_gourd": {
+          "n": 42,
+          "accuracy": 1.0
+        },
+        "capsicum": {
+          "n": 221,
+          "accuracy": 1.0
+        },
+        "carrot": {
+          "n": 1306,
+          "accuracy": 0.995406
+        },
+        "cucumber": {
+          "n": 116,
+          "accuracy": 0.982759
+        },
+        "mango": {
+          "n": 82,
+          "accuracy": 1.0
+        },
+        "okra": {
+          "n": 46,
+          "accuracy": 1.0
+        },
+        "orange": {
+          "n": 1310,
+          "accuracy": 0.983969
+        },
+        "potato": {
+          "n": 124,
+          "accuracy": 1.0
+        },
+        "strawberry": {
+          "n": 45,
+          "accuracy": 1.0
+        },
+        "tomato": {
+          "n": 1251,
+          "accuracy": 0.996803
+        }
+      }
+    },
+    "Spoiled": {
+      "n": 2726,
+      "accuracy": 0.976156,
+      "per_class_accuracy": {
+        "apple": {
+          "n": 534,
+          "accuracy": 0.968165
+        },
+        "banana": {
+          "n": 410,
+          "accuracy": 0.997561
+        },
+        "bitter_gourd": {
+          "n": 77,
+          "accuracy": 1.0
+        },
+        "capsicum": {
+          "n": 192,
+          "accuracy": 0.984375
+        },
+        "carrot": {
+          "n": 360,
+          "accuracy": 0.994444
+        },
+        "cucumber": {
+          "n": 92,
+          "accuracy": 0.902174
+        },
+        "mango": {
+          "n": 70,
+          "accuracy": 0.942857
+        },
+        "okra": {
+          "n": 28,
+          "accuracy": 1.0
+        },
+        "orange": {
+          "n": 255,
+          "accuracy": 0.984314
+        },
+        "potato": {
+          "n": 167,
+          "accuracy": 0.946108
+        },
+        "strawberry": {
+          "n": 77,
+          "accuracy": 1.0
+        },
+        "tomato": {
+          "n": 464,
+          "accuracy": 0.965517
+        }
+      }
+    }
+  },
+  "confirmation_at_validation_threshold": {
+    "threshold": 0.5,
+    "coverage": 0.999253,
+    "accepted": 8029,
+    "selective_accuracy": 0.987919,
+    "needs_confirmation": 6,
+    "errors_accepted": 97,
+    "errors_sent_to_confirmation": 5,
+    "note": "Reported at the threshold chosen on validation. The threshold was not tuned on test."
+  },
+  "test_images": 8035
+}

@@ -35,6 +35,13 @@ export function StatusBanner({ health, error, loading }: Props) {
             The API is running and{" "}
             <span className="[overflow-wrap:break-word]">{health.model.model_version}</span> is loaded.
           </span>
+          {health.produce_model && (
+            <span className="mt-1 block text-[length:var(--step-small)] text-[var(--muted)]">
+              {health.produce_model.available
+                ? `Produce model ${health.produce_model.model_version} is loaded and recognises the type separately.`
+                : "Automatic produce recognition is unavailable, so you choose the produce type. Freshness is not affected."}
+            </span>
+          )}
         </span>
       </p>
     );

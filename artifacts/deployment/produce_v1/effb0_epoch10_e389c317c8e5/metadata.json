@@ -1,0 +1,66 @@
+{
+  "bundle_schema_version": "freshnet.produce.deployment.v1",
+  "model_version": "freshnet-produce-v1-effb0-e389c317c8e5",
+  "task": "produce-type classification",
+  "architecture": "efficientnet_b0",
+  "smoke_test": false,
+  "created_at": "2026-10-16T20:25:53.948612+00:00",
+  "source_checkpoint": "artifacts/produce/v1/checkpoints/best.pt",
+  "source_checkpoint_sha256": "e389c317c8e5df8f8434dd9025737afe4fb48b39e17d4ee63e87df78cfc759fa",
+  "best_epoch": 10,
+  "selection_rule": "highest validation macro F1 across epochs (computed during training), best.pt",
+  "manifest_fingerprint": "9e3a27855e6e01d97a32fee61273dde59b1df7e3166ef25e764e03b97c872c66",
+  "source_split_fingerprint": "4f2534505b3ca656e72b786046d0d7f7da1088a221fe857a3b16639bd87c8f57",
+  "training": {
+    "stop_reason": "early_stopping",
+    "epochs_completed": 15,
+    "best_epoch": 10,
+    "best_val_macro_f1": 0.987662
+  },
+  "seed": 42,
+  "confirmation": {
+    "enabled": true,
+    "method": "max_softmax_threshold",
+    "threshold": 0.5,
+    "chosen_on": "validation only",
+    "rule": {
+      "method": "max_softmax_threshold",
+      "grid": [
+        0.5,
+        0.6,
+        0.7,
+        0.8,
+        0.9,
+        0.95,
+        0.98
+      ],
+      "target_selective_accuracy": 0.99
+    },
+    "validation_coverage": 0.999491,
+    "validation_selective_accuracy": 0.993248,
+    "note": "Asks the user to confirm low-confidence guesses. Not an out-of-distribution detector."
+  },
+  "validation_metrics": {
+    "n": 7853,
+    "accuracy": 0.992869,
+    "macro_f1": 0.987662,
+    "balanced_accuracy": 0.989765
+  },
+  "test_metrics": {
+    "scope": "produce test subset of the existing v3 holdout; a separate-task evaluation, not a new independent external test",
+    "n": 8035,
+    "accuracy": 0.987306,
+    "macro_f1": 0.978079,
+    "balanced_accuracy": 0.985647
+  },
+  "evaluation_files": {
+    "selection": "artifacts/produce/v1/metrics/eval/selection.json",
+    "test_results": "artifacts/produce/v1/metrics/eval/test_results.json"
+  },
+  "freshness_model_untouched": "artifacts/deployment/v3/fused_epoch29_b962c650ed80",
+  "limitations": [
+    "Recognises only the 12 trained produce types and has no non-produce class.",
+    "Softmax confidence is not a calibrated probability that the item is supported.",
+    "Test images are the existing holdout images, also used for the freshness evaluation (separate-task evaluation)."
+  ]
+}

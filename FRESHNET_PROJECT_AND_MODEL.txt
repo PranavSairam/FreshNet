@@ -249,12 +249,14 @@ Startup: loads the bundle ONCE (settings: FRESHNET_BUNDLE_DIR, FRESHNET_DEVICE,
 default device cpu). Inference runs under a lock in a worker thread.
 
 Endpoints
-  GET  /api/health    API status, model status (available / ready|unavailable,
-                      message, architecture, model_version), database status
+  GET  /api/health    API status, freshness model status (available /
+                      ready|unavailable, message, architecture, model_version),
+                      produce_model status (separate), database status
                       (path reported only as "local-sqlite")
   POST /api/predict   multipart form field "file"; optional field "produce"
                       (a catalogue id such as banana, or unknown)
-  GET  /api/produce   supported produce types for the selector
+  GET  /api/produce   supported produce types, and whether automatic
+                      identification is available (version, threshold)
   GET  /api/guidance  ?produce=&freshness= -> label, severity and guidance
                       from the catalogue (the model is not run)
   GET  /docs          interactive API docs
@@ -263,21 +265,36 @@ Response of /api/predict includes: label, class index, probabilities for Fresh
 and Spoiled, model_version, and elapsed_ms (decode + validation + preprocessing
 + model forward). It also carries combined_label (for example "Fresh banana",
 or "Fresh produce" when identity is unknown), produce {id, label, source,
-model_version, probabilities}, freshness {...}, severity (always
+model_version, probabilities}, identification {status, suggestion,
+confirmation threshold, produce probabilities}, freshness {...}, severity (always
 status "not_assessed") and guidance (reviewed, sourced, general advice).
 
 Produce identity and guidance (added 2026-10-16)
-  - Produce identity is SELECTED BY THE USER. FreshNet has no produce
-    classifier and does not recognise produce from the photo. There is no
-    unknown / non-produce detector.
+  - Produce type is recognised by a SEPARATE 12-class model (EfficientNet-B0,
+    ImageNet-initialised, bundle freshnet-produce-v1-effb0-e389c317c8e5). It runs
+    next to the freshness model on every upload with its own preprocessing,
+    version and outputs; probabilities are never merged. A user's selection
+    always wins. If the produce bundle is missing, fails, or is not confident,
+    identity falls back to Unknown / manual selection and the freshness result
+    is unaffected. The filename is never used.
+  - Classes: apple, banana, bitter gourd, capsicum (bell pepper), carrot,
+    cucumber, mango, okra, orange, potato, strawberry, tomato. It has no
+    "not produce" class and is NOT an unsupported-item detector.
+  - Produce test results (existing holdout, 8,035 images, a separate-task
+    evaluation, not an independent external test): accuracy 0.9873, macro F1
+    0.9781, balanced accuracy 0.9856; validation 0.9929 / 0.9877. These are not
+    freshness numbers and the freshness 98.33 % is not a produce score.
+  - "Please confirm produce type": max-softmax threshold 0.5 chosen on
+    validation only. It rarely fires and is not out-of-distribution detection.
   - The freshness model, preprocessing, argmax rule and weights are unchanged.
   - Spoilage severity is not assessed. The model only separates Fresh from
     Spoiled.
   - Guidance comes from a versioned catalogue built from FDA, USDA FSIS,
     UC Davis Postharvest and UC Master Gardener pages. Storage advice is
     reviewed for 11 produce types; bitter gourd is awaiting review.
-  - Details: docs/PRODUCE_IDENTIFICATION_AND_GUIDANCE.md,
-    docs/SEVERITY_PROPOSAL.md, docs/PRODUCE_LABEL_INVENTORY.md.
+  - Details: docs/PRODUCE_MODEL.md, docs/PRODUCE_DATASET_V1.md,
+    docs/PRODUCE_IDENTIFICATION_AND_GUIDANCE.md, docs/SEVERITY_PROPOSAL.md,
+    docs/PRODUCE_LABEL_INVENTORY.md.
 
 Example (real run, validation image, not a benchmark score):
   label Fresh, Fresh prob 0.99999988, Spoiled prob 7.6e-08,
@@ -318,14 +335,20 @@ Design (latest redesign)
     seed-catalogue plate); credits are in the footer
   - Respects prefers-reduced-motion and keyboard focus
 
-A "Produce type" selector appears once a photo is chosen ("Selected by you").
-Result card shows: "Predicted: Fresh banana" (or "Fresh produce" when unknown),
-who set the produce identity, the model's Fresh/Spoiled label and both
-probabilities, the statement that they are model outputs and not a freshness
-percentage, model version, elapsed time, "Spoilage severity: Not assessed",
-and below it compact guidance (Suggested next steps, Storage guidance, What to
-check yourself, a food-safety note and a sources list). Changing the photo
-clears the result; changing the produce type updates only the label and advice.
+After you choose a photo, the site notes that a separate model will also try to
+recognise the produce type (and lists the supported types). The result card
+shows: "Predicted: Fresh banana" (or "Fresh produce" when unknown), where the
+produce type came from (produce model / confirmed or corrected by you), the
+produce model's top matches labelled as its own scores, the freshness model's
+Fresh/Spoiled label and both probabilities, the statement that they are model
+outputs and not a freshness percentage, model version, elapsed time,
+"Spoilage severity: Not assessed", and compact guidance (Suggested next steps,
+Storage guidance, What to check yourself, a food-safety note and sources).
+A "Correct produce type" control updates only the label and guidance; neither
+model is run again. When the produce model is unsure the card says "Please
+confirm produce type" with its best guess and a one-click "Use ..." button.
+If the produce model is unavailable, a "Produce type" selector appears before
+analysis instead. Changing the photo clears the result.
 
 
 ------------------------------------------------------------------------------
@@ -337,7 +360,10 @@ clears the result; changing the produce type updates only the label and advice.
     ml/models/        ContextBranch, DetailBranch, FusedFreshNet, build_model
     ml/training/      config, data, metrics, train, evaluate
     ml/deployment/    export_bundle.py
-  configs/            dataset.yaml, default.yaml, train.yaml, train_v3.yaml
+    ml/produce/       separate produce-type classifier: build_manifests, data,
+                      model, train, evaluate, export_bundle
+  configs/            dataset.yaml, default.yaml, train.yaml, train_v3.yaml,
+                      produce_v1.yaml
   scripts/            start_local.sh and training launch helpers
   tests/              backend, ml and dataset tests
   docs/               PROJECT_SPEC.md, DATASET.md, TRAINING.md,
@@ -347,6 +373,8 @@ clears the result; changing the produce type updates only the label and advice.
   data/               dataset and manifests (not in git)
 
 Key results on disk:
+  artifacts/produce/v1/metrics/eval/{selection.json,test_results.json,EVALUATION.md}
+                      (produce model; not freshness numbers)
   artifacts/metrics/v3/eval/selection.json
   artifacts/metrics/v3/eval/fused/test/metrics.json  (+ predictions.csv,
                       confusion matrix images, REPORT.md)
@@ -395,6 +423,8 @@ Or start both with:  bash scripts/start_local.sh
 
 Useful settings (backend/.env, which is git-ignored; see .env.example):
   FRESHNET_BUNDLE_DIR=artifacts/deployment/v3/fused_epoch29_b962c650ed80
+  FRESHNET_PRODUCE_BUNDLE_DIR=artifacts/deployment/produce_v1/effb0_epoch10_e389c317c8e5
+                      (empty or missing: manual produce selection only)
   FRESHNET_DEVICE=cpu
 
 Production build of the site:  cd frontend && npm run build
@@ -404,16 +434,19 @@ Tests:  backend/.venv/bin/python -m pytest tests
 ------------------------------------------------------------------------------
 15. VERSION CONTROL AND STATUS
 ------------------------------------------------------------------------------
-  - GitHub repo: https://github.com/PranavSairam/FreshNet (private, because
-    student IDs appear on the site)
-  - Initial commit c26c217 on main is pushed.
-  - Uploaded: code, docs, configs, tests, and the deployment weights.pt
-    (about 19 MB).
+  - GitHub repo: https://github.com/PranavSairam/FreshNet (its visibility was
+    not changed by this work; it was public when last checked, and student
+    IDs appear on the site)
+  - Commit 91777f1 (front-end redesign, produce identity and guidance) is on
+    origin/main. Earlier: initial commit c26c217.
+  - Uploaded earlier: code, docs, configs, tests, and the freshness
+    deployment weights.pt (about 19 MB).
   - NOT uploaded: the dataset, training checkpoints, .env, virtualenv,
     node_modules.
-  - The latest front-end redesign (animated produce, new layout, pictures,
-    credits) and the produce identity / guidance feature are in the working
-    tree and have NOT been committed or pushed yet.
+  - The separate produce-type model work (ml/produce, configs/produce_v1.yaml,
+    the produce bundle under artifacts/deployment/produce_v1 including its
+    16 MB weights.pt, backend/frontend integration, tests and docs) is in the
+    working tree and has NOT been committed or pushed.
 
 Status summary
   Data pipeline ........... done
@@ -423,6 +456,8 @@ Status summary
   Deployment export ....... done and verified
   API ..................... done
   Website ................. done (redesigned)
+  Produce-type model ...... trained, evaluated once, exported and integrated
+                            (docs/PRODUCE_MODEL.md; separate from freshness)
   Medium class ............ not built (future work only)
 
 

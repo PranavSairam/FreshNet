@@ -3,7 +3,7 @@
 Everything here is deterministic and independent of the freshness model:
 
 * Produce identity is either chosen by the user from a fixed catalogue, produced
-  by an optional separate classifier (none ships today), or unknown.
+  by a separate produce classifier (when its bundle is installed), or unknown.
 * Guidance is looked up from a versioned, reviewed catalogue keyed by
   produce type and predicted freshness class. No text supplied by a client is
   ever placed into guidance.
@@ -127,6 +127,10 @@ class ProduceIdentity:
     source: str
     model_version: str | None = None
     probabilities: dict[str, float] | None = None
+    # Set only by an automatic identifier; never part of the public `produce` object.
+    confidence: float | None = None
+    confirmation_required: bool = False
+    confirmation_threshold: float | None = None
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -178,11 +182,11 @@ def _unsupported_produce() -> AppError:
 
 
 class ProduceIdentifier(Protocol):
-    """Interface for a future automatic produce classifier.
+    """Interface for the automatic produce classifier.
 
-    It must be a separate model with its own version and probabilities. It must not
-    reuse the freshness model, and its accuracy must be measured separately.
-    No implementation ships with FreshNet today.
+    It is a separate model with its own version, preprocessing and probabilities. It
+    never reuses the freshness model, and its accuracy is measured separately. The
+    shipped implementation is `app.services.produce_model.BundleProduceIdentifier`.
     """
 
     model_version: str
@@ -206,35 +210,74 @@ def automatic_identification_info() -> dict[str, Any]:
     return {
         "available": _identifier is not None,
         "model_version": getattr(_identifier, "model_version", None) if _identifier else None,
+        "confirmation_threshold": getattr(_identifier, "confirmation_threshold", None) if _identifier else None,
+        "supported_ids": list(getattr(_identifier, "class_order", ())) if _identifier else [],
     }
 
 
-def resolve_identity(selected: ProduceIdentity, image: Any) -> ProduceIdentity:
-    """Pick the identity for a result.
+def _identification(status: str, **extra: Any) -> dict[str, Any]:
+    info: dict[str, Any] = {
+        "status": status,
+        "confirmation_required": False,
+        "suggestion": None,
+        "model_version": None,
+        "probabilities": None,
+        "confidence": None,
+        "confirmation_threshold": None,
+    }
+    info.update(extra)
+    return info
 
-    A user selection always wins. Otherwise try the optional automatic identifier.
-    If it is missing, returns nothing, returns an unsupported id, or raises, identity
-    is unknown and the freshness result is unaffected.
+
+def identify_produce(selected: ProduceIdentity, image: Any) -> tuple[ProduceIdentity, dict[str, Any]]:
+    """Pick the identity for a result and describe how it was obtained.
+
+    A user selection always wins (the automatic model is then not run). Otherwise try
+    the optional automatic identifier. If it is missing, fails, returns nothing or an
+    unsupported id, identity is unknown and the freshness result is unaffected. If the
+    identifier is not confident enough, identity stays unknown and its best guess is
+    offered only as a suggestion the user must confirm.
+
+    status is one of: user_selected, model_predicted, needs_confirmation,
+    unavailable, failed, no_prediction.
     """
     if selected.source == SOURCE_USER:
-        return selected
+        return selected, _identification("user_selected")
     if _identifier is None:
-        return selected
+        return selected, _identification("unavailable")
+    version = getattr(_identifier, "model_version", None)
     try:
         predicted = _identifier.identify(image)
     except Exception:
         logger.exception("Automatic produce identification failed; identity left unknown")
-        return unknown_identity()
+        return unknown_identity(), _identification("failed", model_version=version)
     produce = load_catalogue()["produce"]
     if predicted is None or predicted.produce_id not in produce:
-        return unknown_identity()
-    return ProduceIdentity(
+        return unknown_identity(), _identification("no_prediction", model_version=version)
+    label = produce[predicted.produce_id]["label"]
+    common = {
+        "model_version": predicted.model_version,
+        "probabilities": predicted.probabilities,
+        "confidence": predicted.confidence,
+        "confirmation_threshold": predicted.confirmation_threshold,
+    }
+    if predicted.confirmation_required:
+        suggestion = {"id": predicted.produce_id, "label": label, "confidence": predicted.confidence}
+        return unknown_identity(), _identification(
+            "needs_confirmation", confirmation_required=True, suggestion=suggestion, **common
+        )
+    identity = ProduceIdentity(
         predicted.produce_id,
-        produce[predicted.produce_id]["label"],
+        label,
         SOURCE_MODEL,
         predicted.model_version,
         predicted.probabilities,
     )
+    return identity, _identification("model_predicted", **common)
+
+
+def resolve_identity(selected: ProduceIdentity, image: Any) -> ProduceIdentity:
+    return identify_produce(selected, image)[0]
 
 
 # --------------------------------------------------------------------------- labels

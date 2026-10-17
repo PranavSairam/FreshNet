@@ -8,11 +8,20 @@ export type ModelHealth = {
   model_version: string;
 };
 
+export type ProduceModelHealth = {
+  available: boolean;
+  status: string;
+  model_version: string;
+  confirmation_threshold: number | null;
+};
+
 export type HealthResponse = {
   status: string;
   service: string;
   version: string;
   model: ModelHealth;
+  /** Separate produce-type model. Absent from older API versions. */
+  produce_model?: ProduceModelHealth;
   database: {
     ok: boolean;
     path: string;

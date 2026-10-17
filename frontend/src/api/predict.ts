@@ -44,7 +44,19 @@ export type Described = {
   guidance: Guidance;
 };
 
+/** How the produce type was obtained. It comes from a separate model, never from the freshness model. */
+export type Identification = {
+  status: "user_selected" | "model_predicted" | "needs_confirmation" | "unavailable" | "failed" | "no_prediction";
+  confirmation_required: boolean;
+  suggestion: { id: string; label: string; confidence: number | null } | null;
+  model_version: string | null;
+  probabilities: Record<string, number> | null;
+  confidence: number | null;
+  confirmation_threshold: number | null;
+};
+
 export type Prediction = Described & {
+  identification: Identification;
   label: "Fresh" | "Spoiled";
   label_index: number;
   probabilities: { Fresh: number; Spoiled: number };
@@ -65,7 +77,13 @@ export type ProduceOption = { id: string; label: string };
 export type ProduceCatalogue = {
   catalogue_version: string;
   options: ProduceOption[];
-  identification: { mode: "user_selected"; available: boolean; model_version: string | null };
+  identification: {
+    mode: "user_selected" | "automatic_with_correction";
+    available: boolean;
+    model_version: string | null;
+    confirmation_threshold: number | null;
+    supported_ids: string[];
+  };
 };
 
 export class PredictError extends Error {

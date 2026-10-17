@@ -1,0 +1,11 @@
+{
+  "event": "train_end",
+  "stop_reason": "early_stopping",
+  "epochs_completed": 15,
+  "best_epoch": 10,
+  "best_val_macro_f1": 0.987662,
+  "smoke_test": false,
+  "manifest_fingerprint": "9e3a27855e6e01d97a32fee61273dde59b1df7e3166ef25e764e03b97c872c66",
+  "run_dir": "/Users/sairampranav/FreshNet/artifacts/produce/v1/runs/20261016T175635Z",
+  "completed_at": "2026-10-16T19:41:37.335486+00:00"
+}

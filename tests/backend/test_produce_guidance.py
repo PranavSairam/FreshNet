@@ -194,7 +194,13 @@ def test_produce_endpoint_lists_options_and_user_selected_mode(client: TestClien
     ids = [option["id"] for option in body["options"]]
     assert ids[-1] == "unknown"
     assert {"banana", "apple", "tomato", "bitter_gourd"} <= set(ids)
-    assert body["identification"] == {"mode": "user_selected", "available": False, "model_version": None}
+    assert body["identification"] == {
+        "mode": "user_selected",
+        "available": False,
+        "model_version": None,
+        "confirmation_threshold": None,
+        "supported_ids": [],
+    }
     assert body["catalogue_version"] == load_catalogue()["catalogue_version"]
 
 

@@ -34,7 +34,7 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 Copy-Item .env.example .env
 cd ..
-$env:PYTHONPATH = "$pwd\backend"
+$env:PYTHONPATH = "$pwd\backend;$pwd\ml"
 python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
@@ -85,7 +85,11 @@ The Vite dev server proxies `/api` to `http://127.0.0.1:8000`.
 
 `POST /api/predict` accepts one multipart field named `file`. Static JPEG and PNG only, at most 8 MB and 16 million pixels. Animated images, images with an alpha channel, and images whose EXIF orientation is not upright are rejected. EXIF is not applied, and transparency is not composited. Health can report the API as up while `model.available` is false. A loaded model reports `model.status` of `ready` and the bundle version. `elapsed_ms` covers decode, validation, preprocessing, and the model forward.
 
-`POST /api/predict` also accepts an optional multipart field `produce` (a catalogue id such as `banana`, or `unknown`). FreshNet does not recognise produce from the photo: the identity is chosen by the user and shown as "Selected by you". The response keeps the fields below and adds `combined_label` (for example `Fresh banana`, or `Fresh produce` when unknown), `produce`, `freshness`, `severity` (always `not_assessed`) and `guidance` (reviewed, sourced, general advice). An unsupported `produce` value returns 400 `unsupported_produce`. `GET /api/produce` lists the supported types and `GET /api/guidance?produce=&freshness=` looks up guidance without running the model. See `docs/PRODUCE_IDENTIFICATION_AND_GUIDANCE.md` and `docs/SEVERITY_PROPOSAL.md`.
+**Produce type.** A separate 12-class produce classifier (EfficientNet-B0, `docs/PRODUCE_MODEL.md`) runs alongside the freshness model on every upload, each with its own preprocessing, version and outputs. It names one of apple, banana, bitter gourd, bell pepper (capsicum), carrot, cucumber, mango, okra, orange, potato, strawberry or tomato. It has no "not produce" class and cannot detect unsupported items. On the produce test subset (the existing holdout, a separate-task evaluation) it scored accuracy 0.9873 and macro F1 0.9781; this has nothing to do with the freshness model's 98.33 %. It is configured by `FRESHNET_PRODUCE_BUNDLE_DIR` (default `artifacts/deployment/produce_v1/effb0_epoch10_e389c317c8e5`). If that bundle is missing or fails verification, the API still starts, `produce_model.status` in `/api/health` is `unavailable`, and the website falls back to manual produce selection.
+
+`POST /api/predict` also accepts an optional multipart field `produce` (a catalogue id such as `banana`, or `unknown`). A user selection always wins over the model. The response keeps the fields below and adds `combined_label` (for example `Fresh banana`, or `Fresh produce` when unknown), `produce` (`source` is `model_predicted`, `user_selected` or `unknown`), `identification` (how the type was obtained; `needs_confirmation` with a suggestion when the produce model is not confident), `freshness`, `severity` (always `not_assessed`) and `guidance` (reviewed, sourced, general advice). An unsupported `produce` value returns 400 `unsupported_produce`. `GET /api/produce` lists the supported types and whether automatic identification is available, and `GET /api/guidance?produce=&freshness=` looks up guidance without running either model (used by the website's "Correct produce type" control). See `docs/PRODUCE_IDENTIFICATION_AND_GUIDANCE.md`, `docs/PRODUCE_MODEL.md` and `docs/SEVERITY_PROPOSAL.md`.
+
+Produce model workflow: `python ml/produce/build_manifests.py` (audit and manifests), `scripts/start_detached_produce.py` (detached training, resumable), `ml/produce/evaluate.py select` then `test`, `ml/produce/export_bundle.py`. Monitoring and resume commands are in `docs/PRODUCE_MODEL.md`.
 
 Example from a real validation JPEG/PNG request against the loaded bundle:
 

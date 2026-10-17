@@ -1,0 +1,87 @@
+{
+  "class_order": [
+    "apple",
+    "banana",
+    "bitter_gourd",
+    "capsicum",
+    "carrot",
+    "cucumber",
+    "mango",
+    "okra",
+    "orange",
+    "potato",
+    "strawberry",
+    "tomato"
+  ],
+  "class_to_index": {
+    "apple": 0,
+    "banana": 1,
+    "bitter_gourd": 2,
+    "capsicum": 3,
+    "carrot": 4,
+    "cucumber": 5,
+    "mango": 6,
+    "okra": 7,
+    "orange": 8,
+    "potato": 9,
+    "strawberry": 10,
+    "tomato": 11
+  },
+  "num_classes": 12,
+  "labels": {
+    "apple": "Apple",
+    "banana": "Banana",
+    "bitter_gourd": "Bitter gourd",
+    "capsicum": "Bell pepper / capsicum",
+    "carrot": "Carrot",
+    "cucumber": "Cucumber",
+    "mango": "Mango",
+    "okra": "Okra",
+    "orange": "Orange",
+    "potato": "Potato",
+    "strawberry": "Strawberry",
+    "tomato": "Tomato"
+  },
+  "source_folder_aliases": {
+    "apple": [
+      "apple"
+    ],
+    "banana": [
+      "banana"
+    ],
+    "bitter_gourd": [
+      "bittergroud"
+    ],
+    "capsicum": [
+      "bellpepper",
+      "capciscum",
+      "capsicum"
+    ],
+    "carrot": [
+      "carrot"
+    ],
+    "cucumber": [
+      "cucumber"
+    ],
+    "mango": [
+      "mango"
+    ],
+    "okra": [
+      "okara",
+      "okra"
+    ],
+    "orange": [
+      "orange"
+    ],
+    "potato": [
+      "potato"
+    ],
+    "strawberry": [
+      "strawberry"
+    ],
+    "tomato": [
+      "tomato"
+    ]
+  },
+  "supported_only": "These 12 produce types only. There is no 'other' or 'not produce' class."
+}

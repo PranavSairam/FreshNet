@@ -1,0 +1,18 @@
+{
+  "input_size": 224,
+  "resize": "Resize((224, 224)) bilinear with antialiasing, no crop, aspect ratio not preserved",
+  "imagenet_mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "imagenet_std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "color_mode": "RGB",
+  "eval_deterministic": true,
+  "augmentation_at_inference": false,
+  "separate_from_freshness_preprocessing": true
+}

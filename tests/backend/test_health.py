@@ -23,7 +23,13 @@ def test_root_points_to_health(client: TestClient) -> None:
 
 def test_health_schema_keys(client: TestClient) -> None:
     payload = client.get("/api/health").json()
-    assert set(payload.keys()) == {"status", "service", "version", "model", "database"}
+    assert set(payload.keys()) == {"status", "service", "version", "model", "produce_model", "database"}
+    assert payload["produce_model"] == {
+        "available": False,
+        "status": "unavailable",
+        "model_version": "",
+        "confirmation_threshold": None,
+    }
     assert set(payload["model"].keys()) == {
         "available",
         "status",

@@ -25,11 +25,17 @@ class Settings(BaseSettings):
     sqlite_path: str = "data/local/freshnet.sqlite"
     checkpoint_path: str = "artifacts/checkpoints/freshnet.pt"
     bundle_dir: str = "artifacts/deployment/v3/fused_epoch29_b962c650ed80"
+    # Separate produce-type bundle (empty string disables automatic identification).
+    produce_bundle_dir: str = "artifacts/deployment/produce_v1/effb0_epoch10_e389c317c8e5"
     device: str = "cpu"
 
     @property
     def bundle_directory(self) -> Path:
         return self.resolve_path(self.bundle_dir)
+
+    @property
+    def produce_bundle_directory(self) -> Path:
+        return self.resolve_path(self.produce_bundle_dir)
     config_path: str = "configs/default.yaml"
     architecture_name: str = "FusedFreshNet"
 

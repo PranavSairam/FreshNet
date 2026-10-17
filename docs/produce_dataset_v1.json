@@ -1,0 +1,416 @@
+{
+  "manifest_version": "freshnet-produce-manifests-v1",
+  "produce_fingerprint": "9e3a27855e6e01d97a32fee61273dde59b1df7e3166ef25e764e03b97c872c66",
+  "source_split_fingerprint": "4f2534505b3ca656e72b786046d0d7f7da1088a221fe857a3b16639bd87c8f57",
+  "created_at": "2026-10-16T17:50:40.857156+00:00",
+  "source_manifests_unchanged": true,
+  "source_manifest_sha256": {
+    "all.csv": "aa34c4eaa99b3bbf7897690090846b3d952ef088d74db6eb9d31f34047ab9ca5",
+    "class_mapping.json": "67353fbdb71f196801e0609e252a4f15096bd14a3c784ea9874d12006daac7c4",
+    "exclusions.csv": "46eb2d683d53588e6d00cf67e1e695be7bcba8f06d4e6952db2553f8d6b617fc",
+    "grouping_evidence.jsonl": "b423fba0c1af7e9b5e180e59b9a07213578668a1b274adba446af41a3254cf3b",
+    "split_fingerprint.json": "643989ba675a8331544d650d244c442e2c091176f65ff338602dcf22a0fd591c",
+    "split_report.json": "643989ba675a8331544d650d244c442e2c091176f65ff338602dcf22a0fd591c",
+    "test.csv": "9b8e80f0dc0a7099cf20c5cc76be67ac9ffc58fceee3b5a376ea92249ac10139",
+    "train.csv": "2446127c769a4b0d75f30af9ddafa5acbf8cafd955018d5cc4164e7518ab8d84",
+    "val.csv": "fa5640af688d7281d78096cc4b89efed4c94b42918f589e70a9fa99db0fcc70f"
+  },
+  "num_classes": 12,
+  "classes": [
+    "apple",
+    "banana",
+    "bitter_gourd",
+    "capsicum",
+    "carrot",
+    "cucumber",
+    "mango",
+    "okra",
+    "orange",
+    "potato",
+    "strawberry",
+    "tomato"
+  ],
+  "included_images": {
+    "train": 37162,
+    "val": 7853,
+    "test": 8035
+  },
+  "included_total": 53050,
+  "excluded_total": 2,
+  "exclusion_reasons": {
+    "multi_produce_source_group": 2
+  },
+  "counts_by_split": {
+    "train": {
+      "apple": 4565,
+      "banana": 3667,
+      "bitter_gourd": 469,
+      "capsicum": 2096,
+      "carrot": 7271,
+      "cucumber": 891,
+      "mango": 730,
+      "okra": 377,
+      "orange": 7215,
+      "potato": 1216,
+      "strawberry": 615,
+      "tomato": 8050
+    },
+    "val": {
+      "apple": 887,
+      "banana": 833,
+      "bitter_gourd": 92,
+      "capsicum": 447,
+      "carrot": 1496,
+      "cucumber": 190,
+      "mango": 178,
+      "okra": 78,
+      "orange": 1557,
+      "potato": 293,
+      "strawberry": 136,
+      "tomato": 1666
+    },
+    "test": {
+      "apple": 1000,
+      "banana": 710,
+      "bitter_gourd": 119,
+      "capsicum": 413,
+      "carrot": 1666,
+      "cucumber": 208,
+      "mango": 152,
+      "okra": 74,
+      "orange": 1565,
+      "potato": 291,
+      "strawberry": 122,
+      "tomato": 1715
+    }
+  },
+  "freshness_counts_by_split": {
+    "train": {
+      "apple": {
+        "Fresh": 1733,
+        "Spoiled": 2832
+      },
+      "banana": {
+        "Fresh": 1690,
+        "Spoiled": 1977
+      },
+      "bitter_gourd": {
+        "Fresh": 235,
+        "Spoiled": 234
+      },
+      "capsicum": {
+        "Fresh": 1077,
+        "Spoiled": 1019
+      },
+      "carrot": {
+        "Fresh": 5779,
+        "Spoiled": 1492
+      },
+      "cucumber": {
+        "Fresh": 540,
+        "Spoiled": 351
+      },
+      "mango": {
+        "Fresh": 361,
+        "Spoiled": 369
+      },
+      "okra": {
+        "Fresh": 246,
+        "Spoiled": 131
+      },
+      "orange": {
+        "Fresh": 5925,
+        "Spoiled": 1290
+      },
+      "potato": {
+        "Fresh": 506,
+        "Spoiled": 710
+      },
+      "strawberry": {
+        "Fresh": 228,
+        "Spoiled": 387
+      },
+      "tomato": {
+        "Fresh": 5774,
+        "Spoiled": 2276
+      }
+    },
+    "val": {
+      "apple": {
+        "Fresh": 395,
+        "Spoiled": 492
+      },
+      "banana": {
+        "Fresh": 328,
+        "Spoiled": 505
+      },
+      "bitter_gourd": {
+        "Fresh": 46,
+        "Spoiled": 46
+      },
+      "capsicum": {
+        "Fresh": 216,
+        "Spoiled": 231
+      },
+      "carrot": {
+        "Fresh": 1200,
+        "Spoiled": 296
+      },
+      "cucumber": {
+        "Fresh": 108,
+        "Spoiled": 82
+      },
+      "mango": {
+        "Fresh": 87,
+        "Spoiled": 91
+      },
+      "okra": {
+        "Fresh": 55,
+        "Spoiled": 23
+      },
+      "orange": {
+        "Fresh": 1240,
+        "Spoiled": 317
+      },
+      "potato": {
+        "Fresh": 125,
+        "Spoiled": 168
+      },
+      "strawberry": {
+        "Fresh": 53,
+        "Spoiled": 83
+      },
+      "tomato": {
+        "Fresh": 1265,
+        "Spoiled": 401
+      }
+    },
+    "test": {
+      "apple": {
+        "Fresh": 466,
+        "Spoiled": 534
+      },
+      "banana": {
+        "Fresh": 300,
+        "Spoiled": 410
+      },
+      "bitter_gourd": {
+        "Fresh": 42,
+        "Spoiled": 77
+      },
+      "capsicum": {
+        "Fresh": 221,
+        "Spoiled": 192
+      },
+      "carrot": {
+        "Fresh": 1306,
+        "Spoiled": 360
+      },
+      "cucumber": {
+        "Fresh": 116,
+        "Spoiled": 92
+      },
+      "mango": {
+        "Fresh": 82,
+        "Spoiled": 70
+      },
+      "okra": {
+        "Fresh": 46,
+        "Spoiled": 28
+      },
+      "orange": {
+        "Fresh": 1310,
+        "Spoiled": 255
+      },
+      "potato": {
+        "Fresh": 124,
+        "Spoiled": 167
+      },
+      "strawberry": {
+        "Fresh": 45,
+        "Spoiled": 77
+      },
+      "tomato": {
+        "Fresh": 1251,
+        "Spoiled": 464
+      }
+    }
+  },
+  "source_group_counts_by_split": {
+    "train": {
+      "apple": 856,
+      "banana": 1185,
+      "bitter_gourd": 469,
+      "capsicum": 1989,
+      "carrot": 6223,
+      "cucumber": 687,
+      "mango": 707,
+      "okra": 341,
+      "orange": 4333,
+      "potato": 1117,
+      "strawberry": 593,
+      "tomato": 5606
+    },
+    "val": {
+      "apple": 178,
+      "banana": 259,
+      "bitter_gourd": 92,
+      "capsicum": 427,
+      "carrot": 1279,
+      "cucumber": 146,
+      "mango": 172,
+      "okra": 73,
+      "orange": 961,
+      "potato": 271,
+      "strawberry": 131,
+      "tomato": 1176
+    },
+    "test": {
+      "apple": 195,
+      "banana": 216,
+      "bitter_gourd": 119,
+      "capsicum": 398,
+      "carrot": 1394,
+      "cucumber": 147,
+      "mango": 147,
+      "okra": 65,
+      "orange": 929,
+      "potato": 272,
+      "strawberry": 119,
+      "tomato": 1167
+    }
+  },
+  "source_groups_crossing_splits": 0,
+  "source_groups_with_more_than_one_class": 0,
+  "groups_spanning_capsicum_folder_spellings": 0,
+  "identical_bytes_across_classes": 0,
+  "alias_map": {
+    "apple": {
+      "folder_spellings": [
+        "Apple"
+      ],
+      "alias_keys": [
+        "apple"
+      ]
+    },
+    "banana": {
+      "folder_spellings": [
+        "Banana"
+      ],
+      "alias_keys": [
+        "banana"
+      ]
+    },
+    "bitter_gourd": {
+      "folder_spellings": [
+        "Bittergroud"
+      ],
+      "alias_keys": [
+        "bittergroud"
+      ]
+    },
+    "capsicum": {
+      "folder_spellings": [
+        "Bellpepper",
+        "Capciscum",
+        "Capsicum"
+      ],
+      "alias_keys": [
+        "bellpepper",
+        "capciscum",
+        "capsicum"
+      ]
+    },
+    "carrot": {
+      "folder_spellings": [
+        "Carrot"
+      ],
+      "alias_keys": [
+        "carrot"
+      ]
+    },
+    "cucumber": {
+      "folder_spellings": [
+        "Cucumber"
+      ],
+      "alias_keys": [
+        "cucumber"
+      ]
+    },
+    "mango": {
+      "folder_spellings": [
+        "Mango"
+      ],
+      "alias_keys": [
+        "mango"
+      ]
+    },
+    "okra": {
+      "folder_spellings": [
+        "Okara",
+        "Okra"
+      ],
+      "alias_keys": [
+        "okara",
+        "okra"
+      ]
+    },
+    "orange": {
+      "folder_spellings": [
+        "Orange"
+      ],
+      "alias_keys": [
+        "orange"
+      ]
+    },
+    "potato": {
+      "folder_spellings": [
+        "Potato"
+      ],
+      "alias_keys": [
+        "potato"
+      ]
+    },
+    "strawberry": {
+      "folder_spellings": [
+        "Strawberry"
+      ],
+      "alias_keys": [
+        "strawberry"
+      ]
+    },
+    "tomato": {
+      "folder_spellings": [
+        "Tomato"
+      ],
+      "alias_keys": [
+        "tomato"
+      ]
+    }
+  },
+  "exclusions": [
+    {
+      "image_path": "/Users/sairampranav/FreshNet/data/Dataset/Rotten/RottenBellpepper/rottenPepper (488).jpg",
+      "relative_path": "data/Dataset/Rotten/RottenBellpepper/rottenPepper (488).jpg",
+      "source_folder": "RottenBellpepper",
+      "split": "train",
+      "group_id": "source:/Users/sairampranav/FreshNet/data/Dataset/Rotten/RottenBellpepper/rottenPepper (488).jpg",
+      "reason": "multi_produce_source_group",
+      "detail": "Visual review: the picture shows a carrot, a cucumber and a cabbage side by side. The same pixels are filed under RottenBellpepper and RottenCarrot. It contains no bell pepper, and it is not a single-item image of any one class. Classes in this source group: ['capsicum', 'carrot']. All members excluded rather than assigning an arbitrary class."
+    },
+    {
+      "image_path": "/Users/sairampranav/FreshNet/data/Dataset/Rotten/RottenCarrot/rottenCarrot (65).jpg",
+      "relative_path": "data/Dataset/Rotten/RottenCarrot/rottenCarrot (65).jpg",
+      "source_folder": "RottenCarrot",
+      "split": "train",
+      "group_id": "source:/Users/sairampranav/FreshNet/data/Dataset/Rotten/RottenBellpepper/rottenPepper (488).jpg",
+      "reason": "multi_produce_source_group",
+      "detail": "Visual review: the picture shows a carrot, a cucumber and a cabbage side by side. The same pixels are filed under RottenBellpepper and RottenCarrot. It contains no bell pepper, and it is not a single-item image of any one class. Classes in this source group: ['capsicum', 'carrot']. All members excluded rather than assigning an arbitrary class."
+    }
+  ],
+  "limits": [
+    "Produce type is the dataset folder name. Spot-checked visually on train samples, not verified image by image.",
+    "No specimen ids. Counts are images, not distinct specimens, and many are augmented copies.",
+    "There are no non-produce or out-of-scope images, so no unknown class exists or can be evaluated."
+  ]
+}

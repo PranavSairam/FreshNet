@@ -16,12 +16,13 @@ router = APIRouter()
 @router.get("/produce")
 def produce_options() -> dict:
     """Supported produce types for the selector, and whether automatic identification exists."""
+    info = automatic_identification_info()
     return {
         "catalogue_version": catalogue_version(),
         "options": list_produce_options(),
         "identification": {
-            "mode": "user_selected",
-            **automatic_identification_info(),
+            "mode": "automatic_with_correction" if info["available"] else "user_selected",
+            **info,
         },
     }
 

@@ -1,0 +1,407 @@
+{
+  "selected_at": "2026-10-16T19:42:54.392132+00:00",
+  "selection_rule": "highest validation macro F1 across epochs (computed during training), best.pt",
+  "checkpoint": "artifacts/produce/v1/checkpoints/best.pt",
+  "checkpoint_sha256": "e389c317c8e5df8f8434dd9025737afe4fb48b39e17d4ee63e87df78cfc759fa",
+  "best_epoch": 10,
+  "training": {
+    "stop_reason": "early_stopping",
+    "epochs_completed": 15,
+    "best_epoch": 10,
+    "best_val_macro_f1": 0.987662
+  },
+  "manifest_fingerprint": "9e3a27855e6e01d97a32fee61273dde59b1df7e3166ef25e764e03b97c872c66",
+  "source_split_fingerprint": "4f2534505b3ca656e72b786046d0d7f7da1088a221fe857a3b16639bd87c8f57",
+  "class_order": [
+    "apple",
+    "banana",
+    "bitter_gourd",
+    "capsicum",
+    "carrot",
+    "cucumber",
+    "mango",
+    "okra",
+    "orange",
+    "potato",
+    "strawberry",
+    "tomato"
+  ],
+  "class_to_index": {
+    "apple": 0,
+    "banana": 1,
+    "bitter_gourd": 2,
+    "capsicum": 3,
+    "carrot": 4,
+    "cucumber": 5,
+    "mango": 6,
+    "okra": 7,
+    "orange": 8,
+    "potato": 9,
+    "strawberry": 10,
+    "tomato": 11
+  },
+  "preprocessing": {
+    "input_size": 224,
+    "imagenet_mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "imagenet_std": [
+      0.229,
+      0.224,
+      0.225
+    ],
+    "eval_deterministic": true,
+    "train_augmentation": null
+  },
+  "validation_metrics": {
+    "n": 7853,
+    "accuracy": 0.992869,
+    "macro_f1": 0.987662,
+    "balanced_accuracy": 0.989765,
+    "per_class": {
+      "apple": {
+        "precision": 0.997732,
+        "recall": 0.992108,
+        "f1": 0.994912,
+        "support": 887
+      },
+      "banana": {
+        "precision": 0.9988,
+        "recall": 0.9988,
+        "f1": 0.9988,
+        "support": 833
+      },
+      "bitter_gourd": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 92
+      },
+      "capsicum": {
+        "precision": 0.964758,
+        "recall": 0.979866,
+        "f1": 0.972253,
+        "support": 447
+      },
+      "carrot": {
+        "precision": 0.992032,
+        "recall": 0.998663,
+        "f1": 0.995336,
+        "support": 1496
+      },
+      "cucumber": {
+        "precision": 0.994565,
+        "recall": 0.963158,
+        "f1": 0.97861,
+        "support": 190
+      },
+      "mango": {
+        "precision": 0.988636,
+        "recall": 0.977528,
+        "f1": 0.983051,
+        "support": 178
+      },
+      "okra": {
+        "precision": 0.917647,
+        "recall": 1.0,
+        "f1": 0.957055,
+        "support": 78
+      },
+      "orange": {
+        "precision": 0.999354,
+        "recall": 0.992935,
+        "f1": 0.996134,
+        "support": 1557
+      },
+      "potato": {
+        "precision": 0.982877,
+        "recall": 0.979522,
+        "f1": 0.981197,
+        "support": 293
+      },
+      "strawberry": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 136
+      },
+      "tomato": {
+        "precision": 0.994598,
+        "recall": 0.994598,
+        "f1": 0.994598,
+        "support": 1666
+      }
+    },
+    "class_order": [
+      "apple",
+      "banana",
+      "bitter_gourd",
+      "capsicum",
+      "carrot",
+      "cucumber",
+      "mango",
+      "okra",
+      "orange",
+      "potato",
+      "strawberry",
+      "tomato"
+    ],
+    "confusion_matrix": [
+      [
+        880,
+        0,
+        0,
+        4,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        832,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        92,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        438,
+        3,
+        0,
+        0,
+        1,
+        1,
+        2,
+        0,
+        2
+      ],
+      [
+        0,
+        0,
+        0,
+        2,
+        1494,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        183,
+        0,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        174,
+        0,
+        0,
+        3,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        78,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        2,
+        3,
+        0,
+        0,
+        0,
+        1546,
+        0,
+        0,
+        6
+      ],
+      [
+        1,
+        0,
+        0,
+        1,
+        4,
+        0,
+        0,
+        0,
+        0,
+        287,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        136,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        6,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1657
+      ]
+    ]
+  },
+  "validation_recomputed_matches_training_log": true,
+  "confirmation": {
+    "method": "max_softmax_threshold",
+    "target_selective_accuracy": 0.99,
+    "chosen_on": "validation only",
+    "chosen": {
+      "threshold": 0.5,
+      "coverage": 0.999491,
+      "accepted": 7849,
+      "selective_accuracy": 0.993248,
+      "needs_confirmation": 4,
+      "errors_accepted": 53,
+      "errors_sent_to_confirmation": 3,
+      "rule_outcome": "smallest grid value with selective accuracy >= 0.99"
+    },
+    "validation_trade_off": [
+      {
+        "threshold": 0.5,
+        "coverage": 0.999491,
+        "accepted": 7849,
+        "selective_accuracy": 0.993248,
+        "needs_confirmation": 4,
+        "errors_accepted": 53,
+        "errors_sent_to_confirmation": 3
+      },
+      {
+        "threshold": 0.6,
+        "coverage": 0.997071,
+        "accepted": 7830,
+        "selective_accuracy": 0.994253,
+        "needs_confirmation": 23,
+        "errors_accepted": 45,
+        "errors_sent_to_confirmation": 11
+      },
+      {
+        "threshold": 0.7,
+        "coverage": 0.995543,
+        "accepted": 7818,
+        "selective_accuracy": 0.994884,
+        "needs_confirmation": 35,
+        "errors_accepted": 40,
+        "errors_sent_to_confirmation": 16
+      },
+      {
+        "threshold": 0.8,
+        "coverage": 0.992614,
+        "accepted": 7795,
+        "selective_accuracy": 0.995382,
+        "needs_confirmation": 58,
+        "errors_accepted": 36,
+        "errors_sent_to_confirmation": 20
+      },
+      {
+        "threshold": 0.9,
+        "coverage": 0.988412,
+        "accepted": 7762,
+        "selective_accuracy": 0.996393,
+        "needs_confirmation": 91,
+        "errors_accepted": 28,
+        "errors_sent_to_confirmation": 28
+      },
+      {
+        "threshold": 0.95,
+        "coverage": 0.983828,
+        "accepted": 7726,
+        "selective_accuracy": 0.997282,
+        "needs_confirmation": 127,
+        "errors_accepted": 21,
+        "errors_sent_to_confirmation": 35
+      },
+      {
+        "threshold": 0.98,
+        "coverage": 0.975678,
+        "accepted": 7662,
+        "selective_accuracy": 0.998042,
+        "needs_confirmation": 191,
+        "errors_accepted": 15,
+        "errors_sent_to_confirmation": 41
+      }
+    ],
+    "note": "A confirmation/abstention rule. It is not an out-of-distribution detector: the model has no non-produce class."
+  },
+  "test_split_opened": false,
+  "device": "mps",
+  "torch": "2.14.0"
+}

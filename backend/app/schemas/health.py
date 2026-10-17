@@ -15,9 +15,17 @@ class DatabaseStatus(BaseModel):
     message: str
 
 
+class ProduceModelStatus(BaseModel):
+    available: bool
+    status: str = Field(description="ready or unavailable. When unavailable, produce type is chosen manually.")
+    model_version: str = ""
+    confirmation_threshold: float | None = None
+
+
 class HealthResponse(BaseModel):
     status: str
     service: str
     version: str
     model: ModelStatus
+    produce_model: ProduceModelStatus
     database: DatabaseStatus

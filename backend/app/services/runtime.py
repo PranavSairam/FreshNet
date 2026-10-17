@@ -12,7 +12,7 @@ from app.core.errors import AppError
 from app.schemas.health import ModelStatus
 from app.services.image_policy import validate_image_bytes
 from app.services.inference import BundleError, LoadedBundle, classify_pil, load_bundle
-from app.services.produce import ProduceIdentity, describe_result, resolve_identity, unknown_identity
+from app.services.produce import ProduceIdentity, describe_result, identify_produce, unknown_identity
 
 logger = logging.getLogger("freshnet.runtime")
 
@@ -87,7 +87,9 @@ def predict_bytes(data: bytes, produce: ProduceIdentity | None = None) -> dict[s
         raise AppError("inference_failed", "The image could not be classified.", 500)
     # Timing above covers the freshness path only. Identity and guidance are
     # deterministic lookups done afterwards.
-    identity = resolve_identity(produce or unknown_identity(), image)
+    # The produce model gets the same validated image but its own preprocessing, and a
+    # failure here can never change or block the freshness result computed above.
+    identity, identification = identify_produce(produce or unknown_identity(), image)
     described = describe_result(result["label"], identity)
     return {
         "label": result["label"],
@@ -99,6 +101,7 @@ def predict_bytes(data: bytes, produce: ProduceIdentity | None = None) -> dict[s
         "contract_version": "freshnet.predict.v2",
         "combined_label": described["combined_label"],
         "produce": described["produce"],
+        "identification": identification,
         "freshness": {
             "label": result["label"],
             "class_index": result["label_index"],
